@@ -1,0 +1,161 @@
+﻿using System.Reflection.Metadata.Ecma335;
+using Eco.Gameplay.Items;
+using Eco.Gameplay.Objects;
+using Eco.Shared.Localization;
+using Eco.Shared.Logging;
+using Eco.Shared.Serialization;
+using Eco.Shared.Utils;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+
+namespace Eco.Mods.MechanicExpansion
+{
+    internal class TuneRelationManager
+    {
+        private static bool Initialized = false;
+        public static readonly int TUNE_COUNT = 5;
+        private static readonly String FILE_NAME = "./Configs/MechanicExpansion.Eco";
+        private static readonly String BACKUP_FILE_NAME = "./Configs/MechanicExpansionBackup.Eco";
+        private static readonly int VERSION = 1;
+        
+        private static Dictionary<Type, TuneRelation> Relations = new Dictionary<Type, TuneRelation>();
+
+        private static void LoadVehicleRelations()
+        {
+            bool isFirst = false;
+            if (!File.Exists(FILE_NAME))
+            {
+                File.WriteAllText(FILE_NAME, "{'vehicle_tunes':{}}");
+                isFirst = true;
+            }
+            
+            JObject expansionFile = JToken.ReadFrom((JsonReader)new JsonTextReader((TextReader)File.OpenText(FILE_NAME))) as JObject;
+            if (!isFirst &&( expansionFile["version"] is null || (int)expansionFile["version"] != VERSION))
+            {
+                Log.WriteError(Localizer.Do($"ERROR: MechanicsExpansion.Eco is of data version {expansionFile["version"]} however, MechanicExpansion is expecting version {VERSION}.\nAll tune values WILL be reset on the next server start. To keep the data a backup file has been made with the current values. \nAfter a reset ensuring that the new file has version '{VERSION}', you can replace all the values under 'tune' with their corresponding values in the old file."));
+                File.Copy(FILE_NAME, BACKUP_FILE_NAME, true);
+            }
+
+            if (expansionFile["vehicle_tunes"] == null)
+            {
+                Log.WriteError(Localizer.Do($"ERROR: Unable to load file due to missing tune array."));
+                return;
+            }
+            JObject weightArray = (JObject)expansionFile["vehicle_tunes"];
+
+            foreach (KeyValuePair<string, JToken?> token in weightArray)
+            {
+                Type? vehicleType = Type.GetType(token.Key);
+                if (vehicleType == null)
+                {
+                    Log.WriteError(new LocString("Unable to load vehicle of type " + token.Key + " unknown class name!"));
+                    continue;
+                }
+
+                if (token.Value != null)
+                {
+                    TuneRelation relation = new TuneRelation(token.Value);
+                    Relations.Add(vehicleType, relation);
+                }
+            }
+        }
+        
+        public static void SaveVehicleRelations()
+        {
+            JObject tuneFile = new JObject();
+            tuneFile["version"] = VERSION;
+            JObject tunesObject = new JObject();
+            foreach (KeyValuePair<Type, TuneRelation> pair in Relations)
+            {
+                tunesObject[pair.Key.AssemblyQualifiedName] = pair.Value.toJSON();
+            }
+
+            tuneFile["vehicle_tunes"] = tunesObject;
+            File.WriteAllText(FILE_NAME, tuneFile.ToString());
+        }
+        
+        public static void AddVehicle<T>(WeightRelationData maxSpeedWeights, WeightRelationData fuelConsumptionWeights, WeightRelationData co2EmissionWeights, WeightRelationData storageCapacityWeights, WeightRelationData durabilityWeights, float efficiencyMultiplier, int mountCount, int storageSlots, int weightCapacity)
+        {
+            if (!Initialized) 
+            {
+                Log.WriteError(new LocString("ERROR: Tried to add vehicle relation before relation manager was initalized!"));
+                return;
+            }
+            if (Relations.ContainsKey(typeof(T)))
+            {
+                return;
+            }
+
+            Type itemObjectType = typeof(T);
+            Type? worldObjectItemType = itemObjectType.BaseType;
+            if (worldObjectItemType == null || worldObjectItemType.GetGenericTypeDefinition() != typeof(WorldObjectItem<>))
+            {
+                Log.WriteError(Localizer.Do($"ERROR: Provided type {itemObjectType} does not use WorldObjectItem"));
+                return;
+            }
+
+            Type worldObjectType = worldObjectItemType.GetGenericArguments()[0];
+            if (!worldObjectType.IsSubclassOf(typeof(PhysicsWorldObject)))
+            {
+                Log.WriteError(Localizer.Do($"ERROR: Provided type {itemObjectType} is not a vehicle."));
+                return;
+            }
+            
+            
+            Relations.Add(itemObjectType, new TuneRelation(
+                maxSpeedWeights,
+                fuelConsumptionWeights,
+                co2EmissionWeights,
+                storageCapacityWeights,
+                durabilityWeights,
+                efficiencyMultiplier,
+                mountCount,
+                storageSlots,
+                weightCapacity
+                )
+            );
+            Log.WriteLine(new LocString("Added vehicle relation, injecting init method..."));
+            
+            
+            
+            /*MethodInfo info = worldObjectType.GetMethod("ExposedModsPreInitialize",
+                BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
+            Log.WriteLine(Localizer.Do($"Type: {worldObjectType}, Method: {info} + {info.GetType()}"));
+            //Traverse traverse = Traverse.Create(worldObjectType);
+            //traverse.Method("ModsPreInitialize");
+           // VehicleMethodInfo method = new VehicleMethodInfo(info, efficiencyMultiplier, mountCount, storageSlots, weightCapacity);
+            MethodInfo method2 = typeof(TuneRelationManager).GetMethod("ModsPreInitializeInj", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
+            Log.WriteLine(Localizer.Do($"Successful init of vehicle method: {info} and method 2: {method2}, patching now... {method2.GetType()}"));
+            MechanicExpansion.harmonyInstance.Patch(info, method2);*/
+        }
+
+        public static EvaluatedData EvaluateVehicle(Type type, int[] tunes)
+        {
+            /*float[] fTunes = new float[tunes.Length];
+            for (int i = 0; i < tunes.Length; i++)
+            {
+                fTunes[i] = tunes[i] / 100f;
+            }*/
+            
+            TuneRelation relation = Relations[type];
+            return relation.Evaluate(tunes);
+        }
+
+        public static void Initalize()
+        {
+            Log.WriteLine(new LocString("Loading vehicle relations..."));
+            LoadVehicleRelations();
+            Initialized = true;
+        }
+        
+        public static void Deinitalize()
+        {
+            SaveVehicleRelations();
+        }
+
+        public static TuneRelation GetTuneRelation(Type vType)
+        {
+            return Relations[vType];
+        }
+    }
+}
