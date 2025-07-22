@@ -33,34 +33,69 @@ namespace Eco.Mods.MechanicExpansion
 
         public async Task ShutdownAsync()
         {
-            TuneRelationManager.Deinitalize();
+            TuneManager.Deinitalize();
         }
 
         public async void Initialize(TimedTask timer)
         {
 	        Log.WriteLine(new LocString("Initializing Mechanic Expansion"));
             
-            TuneRelationManager.Initalize();
+            TuneManager.Initalize();
 
-            TuneRelationManager.AddVehicle<SteamTruckItem>(
-                new WeightRelationData(18, 10),
-                new WeightRelationData(300, 40),
-                new WeightRelationData(0.2f, 0.15f),
-                new WeightRelationData(5000000, 1000000),
-                new WeightRelationData(1, 0.6f),
-                3,2, 24, 5000000
+            TuneManager.AddVehicle<SteamTruckItem>(
+                new TuneValueTemplate(18, 4, 3), // Max speed, variance makes no difference
+                new TuneValueTemplate(300, 100, 150), // Fuel consumption, higher variance preferred
+                new TuneValueTemplate(0.2f, 0.1f, 0.2f), // Co2 Emissions, very high profile preferred
+                new TuneValueTemplate(5000000, 2500000), // Storage capacity, variance makes no difference
+                new TuneValueTemplate(1, 0.8f), // Durability weights, higher variance preferred
+                new TuneValueTemplate(1, 0.4f, 0.8f)
             );
 
-            /*TuneRelationManager.AddVehicle<SteamTractorItem>(
-                new WeightRelationData(12, 3),
-                new WeightRelationData(225, 60),
-                new WeightRelationData(0.07f, 0.025f),
-                new WeightRelationData(0, 0),
-                new WeightRelationData(1, 0.4f),
-                1, 1, 0, 0
-            );*/
+            TuneManager.AddVehicle<SteamTractorItem>(
+                new TuneValueTemplate(12, 4),
+                new TuneValueTemplate(225, 100, 120),
+                new TuneValueTemplate(0.07f, 0.055f),
+                new TuneValueTemplate(2500000, 100000), // Applies to attached objects as well
+                new TuneValueTemplate(1, 0.4f), 
+                new TuneValueTemplate(1, 0.4f, 0.8f)
+            );
+            
+            TuneManager.AddVehicle<PoweredCartItem>(
+                new TuneValueTemplate(12, 8),
+                new TuneValueTemplate(110, 40, 90),
+                new TuneValueTemplate(0.1f, 0.09f),
+                new TuneValueTemplate(3500000, 100000),
+                new TuneValueTemplate(1, 0.8f),
+                new TuneValueTemplate(1, 0.4f, 0.8f)
+            );
+            
+            TuneManager.AddVehicle<TruckItem>(
+                new TuneValueTemplate(20, 8, 4),
+                new TuneValueTemplate(250, 50, 100),
+                new TuneValueTemplate(0.5f, 0.2f, 1f),
+                new TuneValueTemplate(8000000, 3000000),
+                new TuneValueTemplate(1, 0.8f),
+                new TuneValueTemplate(4, 2f, 1.5f)
+            );
+            
+            TuneManager.AddVehicle<SmallWoodCartItem>(
+                new TuneValueTemplate(10, 2, 3),
+                new TuneValueTemplate(0,0),
+                new TuneValueTemplate(0,0),
+                new TuneValueTemplate(1400000, 800000),
+                new TuneValueTemplate(0,0),
+                new TuneValueTemplate(1, 0.25f, 0.5f)
+            );
+            TuneManager.AddVehicle<WoodCartItem>(
+                new TuneValueTemplate(12, 4, 2),
+                new TuneValueTemplate(0,0),
+                new TuneValueTemplate(0,0),
+                new TuneValueTemplate(1400000, 800000),
+                new TuneValueTemplate(1, 0.8f),
+                new TuneValueTemplate(1, 0.35f, 0.5f)
+            );
+            
             status = "Running";
-            // TODO Test all the systems, make sure that durability weights is properly added.
         }
     }
 }

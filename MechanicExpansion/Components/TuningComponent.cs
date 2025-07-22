@@ -15,8 +15,10 @@ using Eco.Gameplay.DynamicValues;
 using Eco.Gameplay.Economy;
 using Eco.Gameplay.Systems.NewTooltip;
 using Eco.Gameplay.Utils;
+using Eco.Mods.MechanicExpansion.Talents;
 using Eco.Mods.TechTree;
 using Eco.Shared.Items;
+using Eco.Shared.Utils;
 
 namespace Eco.Mods.MechanicExpansion
 {
@@ -112,8 +114,12 @@ namespace Eco.Mods.MechanicExpansion
             get => GetTuneString().ToString();
         }
 
-        public static SkillModifiedValue MechanicSkillBonusPoint = new SkillModifiedValue(0f, new AdditiveStrategy(new float[]{0, 1, 2, 3, 4, 5, 6}), typeof(MechanicsSkill), typeof(MechanicsSkill), new LocString("Gives you more points to allocate towards tuning"), DynamicValueType.Yield);
-
+        public static AdditiveStrategy BaseSkillPointsGain => new AdditiveStrategy(new float[]{0, 1, 2, 3, 4, 5, 6});
+        public static SkillModifiedValue MechanicSkillBonusPoint = new SkillModifiedValue(0f, BaseSkillPointsGain, typeof(MechanicsSkill), typeof(TuningComponent), new LocString("Gives you more points to allocate towards tuning"), DynamicValueType.Yield);
+        public static TalentModifiedValue TalentBonus = new TalentModifiedValue(typeof(TuningComponent), typeof(MechanicsSkillPointTalent), 0F);
+        public static MultiDynamicValue SkillPointValue = new MultiDynamicValue(MultiDynamicOps.Sum, MechanicSkillBonusPoint, TalentBonus);
+        
+        
         private bool HasTuneChanged = false;
         
 
@@ -128,7 +134,7 @@ namespace Eco.Mods.MechanicExpansion
             base.Initialize();
             //this.Parent.GetComponent<PluginModulesComponent>().OnChanged.Add(OnVehicleAdded);
             Inventory.OnChanged.Add(OnVehicleAdded);
-            TuneBars = new TuneBar[TuneRelationManager.TUNE_COUNT];
+            TuneBars = new TuneBar[TuneManager.TUNE_COUNT];
             for (int i = 0; i < TuneBars.Length; i++)
             {
                 TuneBars[i] = new TuneBar();
@@ -143,10 +149,15 @@ namespace Eco.Mods.MechanicExpansion
             {
                 HasTunableItem = false;
                 vehicleAddedUser = null;
+                if (Inventory.Stacks.First().Item != null)
+                {
+                    user.Player.InfoBox(Localizer.Do($"<color=red>Item {Inventory.Stacks.First().Item} is not tunable, try placing it down first.</color>"));
+                }
                 return;
             }
             HasTunableItem = !Inventory.IsEmpty;
             vehicleAddedUser = user;
+            this.Changed(nameof(TuneValueString));
             base.Parent.SetDirty();
         }
 
@@ -167,44 +178,64 @@ namespace Eco.Mods.MechanicExpansion
         [Autogen]
         [UITypeName("BigButton")]
         [VisibilityParam("HasTunableItem")]
+        [LocDescription("Tune the vehicle.")]
         public void ApplyTune(Player player)
         {
             Log.WriteLine(Localizer.Do($"HOLY TUNE"));
+            if (vehicleAddedUser == null)
+            {
+                player.InfoBox(Localizer.Do($"<color=red>Unknown player, try to replace the vehicle in the tuning slot.</color>"));  
+            }
+
+            if (player != vehicleAddedUser.Player)
+            {
+                player.InfoBox(Localizer.Do($"<color=red>Different player placed this vehicle, try to replace the vehicle in the tuning slot.</color>"));  
+            }
             if (HasTunableItem)
             {
                 ItemStack item = Inventory.Stacks.First();
-                int[] tuneValues = new int[TuneRelationManager.TUNE_COUNT];
-                for (int i = 0; i < TuneRelationManager.TUNE_COUNT; i++)
+                int[] tuneValues = new int[TuneManager.TUNE_COUNT];
+                for (int i = 0; i < TuneManager.TUNE_COUNT; i++)
                 {
                     tuneValues[i] = TuneBars[i].Tune;
                 }
-                EvaluatedData evalData = TuneRelationManager.EvaluateVehicle(item.Item.GetType(), tuneValues);
+                EvaluatedData evalData = TuneManager.EvaluateVehicle(item.Item.GetType(), tuneValues);
                 if (item.Item is IPersistentData data && data.PersistentData is ItemPersistentData itemData)
                 {
-                    itemData.SetPersistentData<TuneableComponent>(evalData);
+                    if (player.User.Stomach.BurnCalories(GetCalorieCost(), false))
+                    {
+                        itemData.SetPersistentData<TuneableComponent>(evalData);
+                        player.InfoBox(Localizer.Do($"Successfully Tuned vehicle!"));   
+                    }
+                    else
+                    {
+                        player.InfoBox(Localizer.Do($"<color=red>Insufficient Calories.</color>"));  
+                    }
                 }
             }
         }
 
+        public float GetCalorieCost()
+        {
+            int absSum = 0;
+            foreach (TuneBar bar in TuneBars)
+            {
+                absSum += Math.Abs(bar.Tune);
+            }
+
+            return absSum * 100;
+        }
+
         public void OnTuneChanged()
         {
-            Log.WriteLine(new LocString($"Values have been changed, "));
             this.Changed(nameof(TuneBars));
             this.Changed(nameof(TuneValueString));
             HasTuneChanged = true;
         }
-
-        [DependsOnMember("TuneBars")]
-        public LocString GetTuneString()
-        {
-            Log.WriteLine(Localizer.Do($"Getting Tune String"));
-            return GetTuneStringWithInaccuracy(0.75f);
-        }
         
         private EvaluatedData? PrevData = null;
         
-        [DependsOnMember("TuneBars")]
-        public LocString GetTuneStringWithInaccuracy(float accuracy)
+        public LocString GetTuneString()
         {
             EvaluatedData? data = GetEvaluatedData();
             if (data == null)
@@ -222,19 +253,20 @@ namespace Eco.Mods.MechanicExpansion
                 PrevData = data;
             }
 
-            TuneRelation relation = TuneRelationManager.GetTuneRelation(Inventory.Stacks.First().Item.GetType());
-            Log.WriteLine(Localizer.Do($"relation: {relation}"));
+            VehicleTuneData vehicleData = TuneManager.GetTuneRelation(Inventory.Stacks.First().Item.GetType());
             LocString output = Localizer.Do(
                 $"""
                  Current Tuner: {vehicleAddedUser.Name}
-                 Available Points: <color={GetPointsColor(relation)}>{GetPoints(relation)}</color>
+                 Available Points: <color={GetPointsColor(vehicleData)}>{GetPoints(vehicleData)}</color>
                  Bonus Points: <color=green>{MechanicSkillBonusPoint.GetCurrentValueInt(new UserDynamicValueContext(vehicleAddedUser), this)}</color>
-                 Accuracy: <color={AccuracyToColor(accuracy)}>{accuracy}</color>%
-                 <color={relation.MaxSpeedWeights.GetColorFromEvaluated(data.Value.MaxSpeedValue)}>Max Speed: {data.Value.MaxSpeedValue:0.0}</color> kmph ({GetTrendIcon(data.Value.MaxSpeedValue, PrevData.Value.MaxSpeedValue)})
-                 <color={relation.FuelConsumptionWeights.GetColorFromEvaluated(data.Value.FuelConsumptionValue)}>Fuel Consumption: {data.Value.FuelConsumptionValue:0}</color> joules/s ({GetTrendIcon(data.Value.FuelConsumptionValue, PrevData.Value.FuelConsumptionValue, true)})
-                 <color={relation.CO2EmissionWeights.GetColorFromEvaluated(data.Value.CO2EmissionValue)}>Emissions: {data.Value.CO2EmissionValue:0.00}</color> ppm/hour ({GetTrendIcon(data.Value.CO2EmissionValue, PrevData.Value.CO2EmissionValue, true)})
-                 <color={relation.StorageCapacityWeights.GetColorFromEvaluated(data.Value.StorageCapacityValue)}>Storage Capacity: {data.Value.StorageCapacityValue/1000:0}</color> kg ({GetTrendIcon(data.Value.StorageCapacityValue, PrevData.Value.StorageCapacityValue)})
-                 <color={relation.DecayMultiplierWeights.GetColorFromEvaluated(data.Value.DecayMultiplier)}>Decay Multiplier: {data.Value.DecayMultiplier*100:0.0}</color> % ({GetTrendIcon(data.Value.DecayMultiplier, PrevData.Value.DecayMultiplier, true)})
+                 <color={vehicleData.MaxSpeedWeights.GetColorFromEvaluated(data.Value.MaxSpeedValue)}>Max Speed: {data.Value.MaxSpeedValue:0.0}</color> kmph ({GetTrendIcon(data.Value.MaxSpeedValue, PrevData.Value.MaxSpeedValue)})
+                 <color={vehicleData.FuelConsumptionWeights.GetColorFromEvaluated(data.Value.FuelConsumptionValue)}>Fuel Consumption: {data.Value.FuelConsumptionValue:0}</color> joules/s ({GetTrendIcon(data.Value.FuelConsumptionValue, PrevData.Value.FuelConsumptionValue, true)})
+                 <color={vehicleData.CO2EmissionWeights.GetColorFromEvaluated(data.Value.CO2EmissionValue)}>Emissions: {data.Value.CO2EmissionValue:0.00}</color> ppm/hour ({GetTrendIcon(data.Value.CO2EmissionValue, PrevData.Value.CO2EmissionValue, true)})
+                 <color={vehicleData.StorageCapacityWeights.GetColorFromEvaluated(data.Value.StorageCapacityValue)}>Storage Capacity: {data.Value.StorageCapacityValue/1000:0}</color> kg ({GetTrendIcon(data.Value.StorageCapacityValue, PrevData.Value.StorageCapacityValue)})
+                 <color={vehicleData.DecayMultiplierWeights.GetColorFromEvaluated(data.Value.DecayMultiplier)}>Decay Multiplier: {data.Value.DecayMultiplier*100:0.0}</color> % ({GetTrendIcon(data.Value.DecayMultiplier, PrevData.Value.DecayMultiplier, true)})
+                 <color={vehicleData.OffroadMultiplierWeights.GetColorFromEvaluated(data.Value.OffroadMultiplier)}>Road Speed Multiplier: {data.Value.OffroadMultiplier*100:0.0}</color> % ({GetTrendIcon(data.Value.OffroadMultiplier, PrevData.Value.OffroadMultiplier, neutral:true)})
+                 
+                 Calorie Cost: <color=orange>{GetCalorieCost()}</color>
                  """
             );
             if (HasTuneChanged)
@@ -244,14 +276,20 @@ namespace Eco.Mods.MechanicExpansion
             }
             return output;
         }
-        public string GetTrendIcon(float current, float prev, bool flip = false)
+
+        public string GetTrendIcon(float current, float prev, bool flip = false, bool neutral = false)
         {
-            if (current == prev)
+            if (Math.Abs(current - prev) < 0.0001f)
             {
                 return "<color=white>-</color>";
             }
-            
             float difference = current - prev;
+            
+            if (neutral)
+            {
+                return $"<color=#4abd4a>{(difference > 0 ? '\u25b2' : '\u25bc')}</color>";
+            }
+            
             float absoluteDifference = Math.Abs(difference);
             float percentDiff = absoluteDifference / prev;
             string color;
@@ -269,61 +307,28 @@ namespace Eco.Mods.MechanicExpansion
             return $"#{((int)(r1 + (r2 - r1) * t)):X02}{(int)(g1 + (g2 - g1) * t):X02}{(int)(b1 + (b2 - b1) * t):X02}";
         }
 
-        public string AccuracyToColor(float accuracy, bool flipped = false)
-        {
-            if (!flipped)
-            {
-                switch (accuracy)
-                {
-                    case < 0.1f:
-                        return "red";
-                    case < 0.25f:
-                        return "fc5d60";
-                    case < 0.5f:
-                        return "#ffd30d";
-                    case < 0.75f: 
-                        return "#6eff0d";
-                    default:
-                        return "green";
-                }
-            }
-            switch (accuracy)
-            {
-                case < 0.1f:
-                    return "#6eff0d";
-                case < 0.25f:
-                    return "#ffd30d";
-                case < 0.5f:
-                    return "#f79d48";
-                case < 0.75f:
-                    return "fc5d60";
-                default:
-                    return "red";
-            }
-        }
-        
-        public int GetPoints(TuneRelation relation)
+        public int GetPoints(VehicleTuneData data)
         {
             int points = 0;
             for (int i = 0; i < TuneBars.Length; i++)
             {
-                points -= relation[i].GetPointCost(TuneBars[i].Tune);
+                points -= data[i+1].GetPointCost(TuneBars[i].Tune);
             }
 
             if (vehicleAddedUser != null)
             {
-                points += MechanicSkillBonusPoint.GetCurrentValueInt(new UserDynamicValueContext(vehicleAddedUser), this);
+                points += SkillPointValue.GetCurrentValueInt(new UserDynamicValueContext(vehicleAddedUser), this);
             }
 
             return points;
         }
 
-        public string GetPointsColor(TuneRelation relation)
+        public string GetPointsColor(VehicleTuneData data)
         {
-            switch (GetPoints(relation))
+            switch (GetPoints(data))
             {
                 case < 0:
-                    return "red";
+                    return "yellow";
                 case 0:
                     return "green";
                 case <3:
@@ -339,27 +344,12 @@ namespace Eco.Mods.MechanicExpansion
                 return null;
             }
             ItemStack item = Inventory.Stacks.First();
-            int[] tuneValues = new int[TuneRelationManager.TUNE_COUNT];
-            for (int i = 0; i < TuneRelationManager.TUNE_COUNT; i++)
+            int[] tuneValues = new int[TuneManager.TUNE_COUNT];
+            for (int i = 0; i < TuneManager.TUNE_COUNT; i++)
             {
                 tuneValues[i] = TuneBars[i].Tune;
             }
-            return TuneRelationManager.EvaluateVehicle(item.Item.GetType(), tuneValues);
+            return TuneManager.EvaluateVehicle(item.Item.GetType(), tuneValues);
         }
-
-        /*ItemStack item = Parent.GetComponent<PluginModulesComponent>().Inventory.Stacks.First();
-                Log.WriteLine(new LocString("Current Tune: " + Tune));
-                if (item.Item is IPersistentData data)
-                {
-                    Log.WriteLine(new LocString("IPersistentData: " + data.PersistentData));
-                    if (data.PersistentData is ItemPersistentData itemData)
-                    {
-                        object tune = 0;
-                        itemData.TryGetPersistentData<TuneableComponent>(out tune);
-
-                        Log.WriteLine(new LocString("Data: " + tune));
-                        itemData.SetPersistentData<TuneableComponent>(Tune);
-                    }
-                }*/
     }
 }

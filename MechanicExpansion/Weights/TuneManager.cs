@@ -10,15 +10,15 @@ using Newtonsoft.Json;
 
 namespace Eco.Mods.MechanicExpansion
 {
-    internal class TuneRelationManager
+    internal class TuneManager
     {
+        public static int TUNE_COUNT = 6;
         private static bool Initialized = false;
-        public static readonly int TUNE_COUNT = 5;
         private static readonly String FILE_NAME = "./Configs/MechanicExpansion.Eco";
         private static readonly String BACKUP_FILE_NAME = "./Configs/MechanicExpansionBackup.Eco";
         private static readonly int VERSION = 1;
         
-        private static Dictionary<Type, TuneRelation> Relations = new Dictionary<Type, TuneRelation>();
+        private static Dictionary<Type, VehicleTuneData> Relations = new Dictionary<Type, VehicleTuneData>();
 
         private static void LoadVehicleRelations()
         {
@@ -38,7 +38,7 @@ namespace Eco.Mods.MechanicExpansion
 
             if (expansionFile["vehicle_tunes"] == null)
             {
-                Log.WriteError(Localizer.Do($"ERROR: Unable to load file due to missing tune array."));
+                Log.WriteError(Localizer.Do($"ERROR: Unable to load file due to missing tune array, using defaults instead."));
                 return;
             }
             JObject weightArray = (JObject)expansionFile["vehicle_tunes"];
@@ -54,8 +54,8 @@ namespace Eco.Mods.MechanicExpansion
 
                 if (token.Value != null)
                 {
-                    TuneRelation relation = new TuneRelation(token.Value);
-                    Relations.Add(vehicleType, relation);
+                    VehicleTuneData data = new VehicleTuneData(token.Value);
+                    Relations.Add(vehicleType, data);
                 }
             }
         }
@@ -65,7 +65,7 @@ namespace Eco.Mods.MechanicExpansion
             JObject tuneFile = new JObject();
             tuneFile["version"] = VERSION;
             JObject tunesObject = new JObject();
-            foreach (KeyValuePair<Type, TuneRelation> pair in Relations)
+            foreach (KeyValuePair<Type, VehicleTuneData> pair in Relations)
             {
                 tunesObject[pair.Key.AssemblyQualifiedName] = pair.Value.toJSON();
             }
@@ -74,7 +74,7 @@ namespace Eco.Mods.MechanicExpansion
             File.WriteAllText(FILE_NAME, tuneFile.ToString());
         }
         
-        public static void AddVehicle<T>(WeightRelationData maxSpeedWeights, WeightRelationData fuelConsumptionWeights, WeightRelationData co2EmissionWeights, WeightRelationData storageCapacityWeights, WeightRelationData durabilityWeights, float efficiencyMultiplier, int mountCount, int storageSlots, int weightCapacity)
+        public static void AddVehicle<T>(TuneValueTemplate maxSpeedWeights, TuneValueTemplate fuelConsumptionWeights, TuneValueTemplate co2EmissionWeights, TuneValueTemplate storageCapacityWeights, TuneValueTemplate durabilityWeights, TuneValueTemplate offroadWeights)
         {
             if (!Initialized) 
             {
@@ -102,22 +102,15 @@ namespace Eco.Mods.MechanicExpansion
             }
             
             
-            Relations.Add(itemObjectType, new TuneRelation(
+            Relations.Add(itemObjectType, new VehicleTuneData(
                 maxSpeedWeights,
                 fuelConsumptionWeights,
                 co2EmissionWeights,
                 storageCapacityWeights,
                 durabilityWeights,
-                efficiencyMultiplier,
-                mountCount,
-                storageSlots,
-                weightCapacity
+                offroadWeights
                 )
             );
-            Log.WriteLine(new LocString("Added vehicle relation, injecting init method..."));
-            
-            
-            
             /*MethodInfo info = worldObjectType.GetMethod("ExposedModsPreInitialize",
                 BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
             Log.WriteLine(Localizer.Do($"Type: {worldObjectType}, Method: {info} + {info.GetType()}"));
@@ -137,8 +130,8 @@ namespace Eco.Mods.MechanicExpansion
                 fTunes[i] = tunes[i] / 100f;
             }*/
             
-            TuneRelation relation = Relations[type];
-            return relation.Evaluate(tunes);
+            VehicleTuneData data = Relations[type];
+            return data.Evaluate(tunes);
         }
 
         public static void Initalize()
@@ -153,9 +146,14 @@ namespace Eco.Mods.MechanicExpansion
             SaveVehicleRelations();
         }
 
-        public static TuneRelation GetTuneRelation(Type vType)
+        public static VehicleTuneData GetTuneRelation(Type vType)
         {
             return Relations[vType];
+        }
+
+        public static EvaluatedData GetDefaultData(Type vType)
+        {
+            return Relations[vType].Evaluate(new []{0, 0, 0, 0, 0, 0});
         }
     }
 }

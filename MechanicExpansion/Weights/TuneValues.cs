@@ -5,41 +5,59 @@ using Newtonsoft.Json.Linq;
 
 namespace Eco.Mods.MechanicExpansion;
 
-public struct WeightRelation
+public struct TuneValues
     {
         public readonly float initialValue;
-        public readonly float variance;
-        public bool isLowerBetter;
+        public readonly float lower;
+        public readonly float upper;
+        public readonly bool isLowerBetter;
+        public readonly bool Neutral;
 
-        public WeightRelation(float initialValue, float variance, bool isLowerBetter = false)
+        public TuneValues(float initialValue, float lower, float upper)
         {
             this.initialValue = initialValue;
-            this.variance = variance;
-            this.isLowerBetter = isLowerBetter;
+            this.lower = lower;
+            this.upper = upper;
         }
 
-        public WeightRelation(WeightRelationData data)
+        public TuneValues(TuneValueTemplate data, bool isLowerBetter = false, bool neutral = false)
         {
             initialValue = data.initialValue;
+            lower = data.lower;
+            upper = data.upper;
+            this.isLowerBetter = isLowerBetter;
+            Neutral = neutral;
         }
         
-        public WeightRelation(JObject jObject)
+        public TuneValues(JObject jObject, bool isLowerBetter = false, bool neutral = false)
         {
             initialValue = (float) jObject["initial_value"];
-            variance = (float) jObject["variance"];
-            isLowerBetter = (bool)jObject["is_lower_better"];
+            lower = (float) jObject["lower"];
+            upper = (float) jObject["upper"];
+            this.isLowerBetter = isLowerBetter;
+            Neutral = neutral;
         }
 
         public float EvaluateInput(int level)
         {
-            return initialValue + Math.Clamp(level / 10f, -1, 1) * variance;
+            if (isLowerBetter)
+            {
+                level *= -1;
+            }
+            float mult = Math.Clamp(level / 10f, -1, 1);
+            return initialValue + mult * (mult > 0 ? upper : lower);
         }
 
         public int GetPointCost(int level)
         {
-            if (isLowerBetter)
+            if (Neutral)
             {
-                level = -level;
+                int output = 0;
+                int lowerBound = Math.Min(Math.Abs(level), 6);
+                output += lowerBound;
+                int upperBound = Math.Abs(level) - lowerBound;
+                output += upperBound * 2;
+                return output;
             }
             if (level > 0)
             {
@@ -50,13 +68,17 @@ public struct WeightRelation
                 output += upperBound * 2;
                 return output;
             }
-
             return level;
         }
 
         public string GetColorFromEvaluated(float evaluated)
         {
-            switch ((evaluated - initialValue)/variance * (isLowerBetter ? -1 : 1))
+            float diff = evaluated - initialValue;
+            if (Neutral)
+            {
+                diff = Math.Abs(diff);
+            }
+            switch (diff / (diff > 0 ? upper : lower) * (isLowerBetter ? -1 : 1))
             {
                 case < -0.75f:
                     return "#ff0000";
@@ -80,8 +102,8 @@ public struct WeightRelation
         {
             JObject jObj = new JObject();
             jObj["initial_value"] = initialValue;
-            jObj["variance"] = variance;
-            jObj["is_lower_better"] = isLowerBetter;
+            jObj["lower"] = lower;
+            jObj["upper"] = upper;
             return jObj;
         }
     }
