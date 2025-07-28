@@ -51,7 +51,7 @@ public struct VehicleTuneData
                 for (int inputInd = 0; inputInd < tunes[tuneInd]; ++inputInd) 
                 {
                     if (tuneInd == inputInd) continue;
-                    evalutedDrags[tuneInd] += tunes[inputInd] * TuneManager.DRAGS[tuneInd][inputInd];
+                    evalutedDrags[tuneInd] += tunes[inputInd] * TuneManager.DRAGS[inputInd][tuneInd] * (GetWeightRelation(inputInd).isLowerBetter ? 1 : -1);
                 }
             }
             return new EvaluatedData(
