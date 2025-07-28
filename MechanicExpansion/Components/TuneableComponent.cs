@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using Eco.Core.Controller;
 using Eco.Core.Utils;
 using Eco.Gameplay.Components;
 using Eco.Gameplay.Components.Storage;
 using Eco.Gameplay.DynamicValues;
+using Eco.Gameplay.GameActions;
 using Eco.Gameplay.Items;
 using Eco.Gameplay.Objects;
 using Eco.Gameplay.Players;
@@ -92,7 +94,7 @@ namespace Eco.Mods.MechanicExpansion
             }
 
             InitalHumanPoweredValue = initalHumanPowered;
-
+            stopwatch.Start();
             base.Initialize();
         }
         
@@ -100,6 +102,7 @@ namespace Eco.Mods.MechanicExpansion
         public static TalentModifiedValue TalentBonus = new TalentModifiedValue(typeof(TuneableComponent), typeof(DrivingEfficiencyTalent), 1F);
         public static MultiDynamicValue EfficiencyValue = new MultiDynamicValue(MultiDynamicOps.Multiply, MechanicSkillBonusPoint, TalentBonus);
         private Player? prevDriver = null;
+        public Stopwatch stopwatch = new Stopwatch();
         public override void Tick()
         {
             Player driver = Parent.GetComponent<VehicleComponent>().Driver;
@@ -112,9 +115,18 @@ namespace Eco.Mods.MechanicExpansion
                 Parent.GetComponent<VehicleComponent>().HumanPowered(InitalHumanPoweredValue);
                 prevDriver = null;
             }
-            
-            
             base.Tick();
+            
+            if (driver == null) return;
+            
+            if (stopwatch.Elapsed.TotalSeconds >= 7)
+            {
+                driver.User.Skillset.AddExperience(typeof(VehicleHandlingSkill), 0.1f, Localizer.DoStr("For driving"));
+                stopwatch.Restart();
+            } else if (!stopwatch.IsRunning)
+            {
+                stopwatch.Restart();
+            }
         }
 
         public string GetDataString()
