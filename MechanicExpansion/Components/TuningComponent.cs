@@ -15,6 +15,7 @@ using Eco.Gameplay.DynamicValues;
 using Eco.Gameplay.Economy;
 using Eco.Gameplay.Systems.NewTooltip;
 using Eco.Gameplay.Utils;
+using Eco.Mods.MechanicExpansion.Skills;
 using Eco.Mods.MechanicExpansion.Talents;
 using Eco.Mods.TechTree;
 using Eco.Shared.Items;
@@ -115,8 +116,8 @@ namespace Eco.Mods.MechanicExpansion
         }
 
         public static AdditiveStrategy BaseSkillPointsGain => new AdditiveStrategy(new float[]{0, 1, 2, 3, 4, 5, 6});
-        public static SkillModifiedValue MechanicSkillBonusPoint = new SkillModifiedValue(0f, BaseSkillPointsGain, typeof(MechanicsSkill), typeof(TuningComponent), new LocString("Gives you more points to allocate towards tuning"), DynamicValueType.Yield);
-        public static TalentModifiedValue TalentBonus = new TalentModifiedValue(typeof(TuningComponent), typeof(MechanicsSkillPointTalent), 0F);
+        public static SkillModifiedValue MechanicSkillBonusPoint = new SkillModifiedValue(0f, BaseSkillPointsGain, typeof(VehicleHandlingSkill), typeof(TuningComponent), new LocString("Gives you more points to allocate towards tuning"), DynamicValueType.Yield);
+        public static TalentModifiedValue TalentBonus = new TalentModifiedValue(typeof(TuningComponent), typeof(TunePointTalent), 0F);
         public static MultiDynamicValue SkillPointValue = new MultiDynamicValue(MultiDynamicOps.Sum, MechanicSkillBonusPoint, TalentBonus);
         
         

@@ -1,5 +1,7 @@
 ﻿using Eco.Core.Plugins.Interfaces;
 using Eco.Core.Utils;
+using Eco.Gameplay.Components;
+using Eco.Gameplay.PowerGrids;
 using Eco.Mods.TechTree;
 using Eco.Shared.Localization;
 using Eco.Shared.Logging;

@@ -45,13 +45,22 @@ public struct VehicleTuneData
         
         public EvaluatedData Evaluate(int[] tunes)
         {
+            float[] evalutedDrags = new float[tunes.Length];
+            for (int tuneInd = 0; tuneInd < tunes.Length; ++tuneInd)
+            {
+                for (int inputInd = 0; inputInd < tunes[tuneInd]; ++inputInd) 
+                {
+                    if (tuneInd == inputInd) continue;
+                    evalutedDrags[tuneInd] += tunes[inputInd] * TuneManager.DRAGS[tuneInd][inputInd];
+                }
+            }
             return new EvaluatedData(
-                MaxSpeedWeights.EvaluateInput(tunes[0]),
-                FuelConsumptionWeights.EvaluateInput(tunes[1]),
-                CO2EmissionWeights.EvaluateInput(tunes[2]),
-                (int) Math.Round(StorageCapacityWeights.EvaluateInput(tunes[3])),
-                DecayMultiplierWeights.EvaluateInput(tunes[4]),
-                (float)Math.Round(OffroadMultiplierWeights.EvaluateInput(tunes[5]), 2)
+                MaxSpeedWeights.EvaluateInput(tunes[0]) + evalutedDrags[0],
+                FuelConsumptionWeights.EvaluateInput(tunes[1]) + evalutedDrags[1],
+                CO2EmissionWeights.EvaluateInput(tunes[2]) + evalutedDrags[2],
+                (int) Math.Round(StorageCapacityWeights.EvaluateInput(tunes[3]) + evalutedDrags[3]),
+                DecayMultiplierWeights.EvaluateInput(tunes[4]) + evalutedDrags[4],
+                (float)Math.Round(OffroadMultiplierWeights.EvaluateInput(tunes[5]), 2) + evalutedDrags[5]
             );
         }
 

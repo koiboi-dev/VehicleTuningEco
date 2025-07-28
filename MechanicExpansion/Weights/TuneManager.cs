@@ -16,7 +16,17 @@ namespace Eco.Mods.MechanicExpansion
         private static bool Initialized = false;
         private static readonly String FILE_NAME = "./Configs/MechanicExpansion.Eco";
         private static readonly String BACKUP_FILE_NAME = "./Configs/MechanicExpansionBackup.Eco";
-        private static readonly int VERSION = 1;
+        private static readonly int VERSION = 2;
+        
+        public static float[][] DRAGS = new[]
+        {
+            /* Max Speed       */ new []{0f   , 0.15f , 0.20f , 0f   , 0.10f , 0f}, // MaxSpeed ^, Fuel Consumption v, Emissions v, StorageCapacity ^, Durability, v, Offroad, -
+            /* FuelConsumption */ new []{0.15f, 0f    , -0.25f, 0.15f, 0f    , 0f},
+            /* Emissions       */ new []{0.20f, -0.25f, 0f    , 0f   , 0.4f  , 0f},
+            /* StorageCapacity */ new []{0.15f, 0.15f , 0.15f , 0f   , 0.15f , 0f},
+            /* Durability      */ new []{0f   , 0f    , 0f    , 0f   , 0f    , 0f},
+            /* Offroading      */ new []{0f   , 0f    , 0f    , 0f   , 0f    , 0f}
+        };
         
         private static Dictionary<Type, VehicleTuneData> Relations = new Dictionary<Type, VehicleTuneData>();
 
@@ -58,6 +68,13 @@ namespace Eco.Mods.MechanicExpansion
                     Relations.Add(vehicleType, data);
                 }
             }
+
+            if (expansionFile["drags"] == null)
+            {
+                Log.WriteError(Localizer.Do($"ERROR: Unable to load custom drags due to missing JSON data."));
+                return;
+            }
+            DRAGS = ((JArray)expansionFile["drags"]).ToObject<float[][]>();
         }
         
         public static void SaveVehicleRelations()
@@ -71,6 +88,7 @@ namespace Eco.Mods.MechanicExpansion
             }
 
             tuneFile["vehicle_tunes"] = tunesObject;
+            tuneFile["drags"] = JArray.FromObject(DRAGS);
             File.WriteAllText(FILE_NAME, tuneFile.ToString());
         }
         

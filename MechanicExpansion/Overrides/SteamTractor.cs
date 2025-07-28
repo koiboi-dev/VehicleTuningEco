@@ -174,7 +174,7 @@ namespace Eco.Mods.TechTree
             this.ModsPreInitialize();
             base.Initialize();    
             this.GetComponent<VehicleComponent>().HumanPowered(2);
-            this.GetComponent<TuneableComponent>().Initialize( 1, 12, 2500000, 100, 200, 0, true, VehicleUtilities.GetInventoryRestriction(this));
+            this.GetComponent<TuneableComponent>().Initialize( 1, 12, 2500000, 2, 100, 200, 0, true, VehicleUtilities.GetInventoryRestriction(this));
             this.GetComponent<CustomTextComponent>().Initialize(200);
             this.GetComponent<FuelSupplyComponent>().Initialize(2, fuelTagList);
             this.GetComponent<FuelConsumptionComponent>().Initialize(225);

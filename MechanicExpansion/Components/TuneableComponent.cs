@@ -3,10 +3,13 @@ using Eco.Core.Controller;
 using Eco.Core.Utils;
 using Eco.Gameplay.Components;
 using Eco.Gameplay.Components.Storage;
+using Eco.Gameplay.DynamicValues;
 using Eco.Gameplay.Items;
 using Eco.Gameplay.Objects;
 using Eco.Gameplay.Players;
 using Eco.Gameplay.Systems.NewTooltip;
+using Eco.Mods.MechanicExpansion.Skills;
+using Eco.Mods.MechanicExpansion.Talents;
 using Eco.Mods.TechTree;
 using Eco.Shared.Items;
 using Eco.Shared.Localization;
@@ -49,7 +52,9 @@ namespace Eco.Mods.MechanicExpansion
         [NewTooltipChildren(CacheAs.Instance, flags: TTFlags.AllowNonControllerTypeForChildren)]
         public string ShortString => GetShortString();
 
-        public void Initialize(int mountCount, int storageSlots, int weightCapacity, params object[] args)
+        private float InitalHumanPoweredValue = 0.5f;
+
+        public void Initialize(int mountCount, int storageSlots, int weightCapacity, float initalHumanPowered, params object[] args)
         {
             if (tuneData.MaxSpeedValue == 0)
             {
@@ -86,7 +91,30 @@ namespace Eco.Mods.MechanicExpansion
                 Parent.GetComponent<PartsComponent>().DecayMultiplier = tuneData.DecayMultiplier;
             }
 
+            InitalHumanPoweredValue = initalHumanPowered;
+
             base.Initialize();
+        }
+        
+        public static SkillModifiedValue MechanicSkillBonusPoint = new SkillModifiedValue(1f, VehicleHandlingSkill.MultiplicativeStrategy, typeof(VehicleHandlingSkill), typeof(TuneableComponent), new LocString("Lets you drive more calorie efficiently"), DynamicValueType.LaborEfficiency);
+        public static TalentModifiedValue TalentBonus = new TalentModifiedValue(typeof(TuneableComponent), typeof(DrivingEfficiencyTalent), 1F);
+        public static MultiDynamicValue EfficiencyValue = new MultiDynamicValue(MultiDynamicOps.Multiply, MechanicSkillBonusPoint, TalentBonus);
+        private Player? prevDriver = null;
+        public override void Tick()
+        {
+            Player driver = Parent.GetComponent<VehicleComponent>().Driver;
+            if (prevDriver == null && driver != null)
+            {
+                Parent.GetComponent<VehicleComponent>().HumanPowered(EfficiencyValue.GetCurrentValue(driver.User) * InitalHumanPoweredValue);
+                prevDriver = driver;
+            } else if (driver == null && prevDriver != null)
+            {
+                Parent.GetComponent<VehicleComponent>().HumanPowered(InitalHumanPoweredValue);
+                prevDriver = null;
+            }
+            
+            
+            base.Tick();
         }
 
         public string GetDataString()
