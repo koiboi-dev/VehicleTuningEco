@@ -1,4 +1,5 @@
-﻿using Eco.Shared.Localization;
+﻿using System;
+using Eco.Shared.Localization;
 using Eco.Shared.Logging;
 using Eco.Shared.Utils;
 using Newtonsoft.Json.Linq;
@@ -38,7 +39,7 @@ public struct TuneValues
             Neutral = neutral;
         }
 
-        public float EvaluateInput(int level)
+        public float EvaluateInput(float level)
         {
             if (isLowerBetter)
             {

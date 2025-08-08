@@ -1,4 +1,5 @@
-﻿using Eco.Core.Controller;
+﻿using System;
+using Eco.Core.Controller;
 using Eco.Gameplay.Items;
 using Eco.Gameplay.Objects;
 using Eco.Gameplay.Players;
@@ -7,6 +8,7 @@ using Eco.Shared.Logging;
 using Eco.Shared.Networking;
 using Eco.Shared.Serialization;
 using System.ComponentModel;
+using System.Linq;
 using Eco.Core.Utils;
 using Eco.Core.PropertyHandling;
 using Eco.Gameplay.Components;
@@ -65,7 +67,6 @@ namespace Eco.Mods.MechanicExpansion
     [CreateComponentTabLoc("Tune Bench", true)]
     [LocDescription("CONFIGURE EVERYTHING !!!!!")]
     [RequireComponent(typeof (StatusComponent), null)]
-    [RequireComponent(typeof(PluginModulesComponent), null)]
     [HasIcon(null)]
     public class TuningComponent : WorldObjectComponent, IHasClientControlledContainers
     {
@@ -115,7 +116,7 @@ namespace Eco.Mods.MechanicExpansion
             get => GetTuneString().ToString();
         }
 
-        public static AdditiveStrategy BaseSkillPointsGain => new AdditiveStrategy(new float[]{0, 1, 2, 3, 4, 5, 6});
+        public static AdditiveStrategy BaseSkillPointsGain => new AdditiveStrategy(new float[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12});
         public static SkillModifiedValue MechanicSkillBonusPoint = new SkillModifiedValue(0f, BaseSkillPointsGain, typeof(VehicleHandlingSkill), typeof(TuningComponent), new LocString("Gives you more points to allocate towards tuning"), DynamicValueType.Yield);
         public static TalentModifiedValue TalentBonus = new TalentModifiedValue(typeof(TuningComponent), typeof(TunePointTalent), 0F);
         public static MultiDynamicValue SkillPointValue = new MultiDynamicValue(MultiDynamicOps.Sum, MechanicSkillBonusPoint, TalentBonus);
@@ -203,10 +204,15 @@ namespace Eco.Mods.MechanicExpansion
                 EvaluatedData evalData = TuneManager.EvaluateVehicle(item.Item.GetType(), tuneValues);
                 if (item.Item is IPersistentData data && data.PersistentData is ItemPersistentData itemData)
                 {
-                    if (player.User.Stomach.BurnCalories(GetCalorieCost(), false))
+                    if (player.User.Stomach.Calories >= GetCalorieCost())
                     {
-                        itemData.SetPersistentData<TuneableComponent>(evalData);
-                        player.InfoBox(Localizer.Do($"Successfully Tuned vehicle!"));   
+                        if (player.User.Stomach.BurnCalories(GetCalorieCost(), false))
+                        {
+                            itemData.SetPersistentData<TuneableComponent>(evalData);
+                            player.InfoBox(Localizer.Do($"Successfully Tuned vehicle!"));
+                        } else {
+                            player.InfoBox(Localizer.Do($"<color=red>Insufficient Calories?</color>"));  
+                        }
                     }
                     else
                     {
@@ -329,13 +335,11 @@ namespace Eco.Mods.MechanicExpansion
             switch (GetPoints(data))
             {
                 case < 0:
-                    return "yellow";
+                    return "#fc3d03";
                 case 0:
                     return "green";
-                case <3:
-                    return "#fcec03";
                 default:
-                    return "#fc3d03";
+                    return "yellow";
             }
         }
         public EvaluatedData? GetEvaluatedData()

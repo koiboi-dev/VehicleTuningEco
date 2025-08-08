@@ -1,4 +1,6 @@
-﻿using System.Reflection.Metadata.Ecma335;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using Eco.Gameplay.Items;
 using Eco.Gameplay.Objects;
 using Eco.Shared.Localization;
@@ -171,6 +173,10 @@ namespace Eco.Mods.MechanicExpansion
 
         public static EvaluatedData GetDefaultData(Type vType)
         {
+            if (!Relations.ContainsKey(vType))
+            {
+                Log.WriteError(Localizer.DoStr("No type"));
+            }
             return Relations[vType].Evaluate(new []{0, 0, 0, 0, 0, 0});
         }
     }

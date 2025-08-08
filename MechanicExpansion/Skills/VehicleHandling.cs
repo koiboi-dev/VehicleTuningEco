@@ -29,7 +29,7 @@ using Eco.Gameplay.Items.Recipes;
 [Serialized]
 [LocDisplayName("Vehicle Handling")]
 [LocDescription(
-    "Understanding vehicles and the way they handle is pivotal for their safe operation. Those who understand the workings of their cars may also learn how to modify their parts and improve performance.")]
+    "Vehicles power our modern world and with experience and knowledge its possible to improve them for the betterment of all.")]
 [Ecopedia("Professions", "Scientist", createAsSubPage: true)]
 [RequiresSkill(typeof(ScientistSkill), 0), Tag("Scientist Specialty"), Tier(2)]
 [Tag("Specialty")]

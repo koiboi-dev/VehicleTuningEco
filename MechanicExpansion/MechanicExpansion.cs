@@ -1,4 +1,5 @@
-﻿using Eco.Core.Plugins.Interfaces;
+﻿using System.Threading.Tasks;
+using Eco.Core.Plugins.Interfaces;
 using Eco.Core.Utils;
 using Eco.Gameplay.Components;
 using Eco.Gameplay.PowerGrids;
@@ -14,7 +15,7 @@ namespace Eco.Mods.MechanicExpansion
         public static ModRegistration Register() => new()
         {
             ModName = "MechanicExpansion",
-            ModDescription = "Adds some tunin stuff",
+            ModDescription = "Lets you tune vehicles",
             ModDisplayName = "Mechanic Expansion"
         };
     }
@@ -45,7 +46,7 @@ namespace Eco.Mods.MechanicExpansion
             TuneManager.Initalize();
 
             TuneManager.AddVehicle<SteamTruckItem>(
-                new TuneValueTemplate(18, 4, 3), // Max speed, variance makes no difference
+                new TuneValueTemplate(18, 3), // Max speed, variance makes no difference
                 new TuneValueTemplate(300, 100, 150), // Fuel consumption, higher variance preferred
                 new TuneValueTemplate(0.2f, 0.1f, 0.2f), // Co2 Emissions, very high profile preferred
                 new TuneValueTemplate(5000000, 2500000), // Storage capacity, variance makes no difference
@@ -63,7 +64,7 @@ namespace Eco.Mods.MechanicExpansion
             );
             
             TuneManager.AddVehicle<PoweredCartItem>(
-                new TuneValueTemplate(12, 8),
+                new TuneValueTemplate(12, 5),
                 new TuneValueTemplate(110, 40, 90),
                 new TuneValueTemplate(0.1f, 0.09f),
                 new TuneValueTemplate(3500000, 100000),
@@ -72,7 +73,7 @@ namespace Eco.Mods.MechanicExpansion
             );
             
             TuneManager.AddVehicle<TruckItem>(
-                new TuneValueTemplate(20, 8, 4),
+                new TuneValueTemplate(20, 4, 5),
                 new TuneValueTemplate(250, 50, 100),
                 new TuneValueTemplate(0.5f, 0.2f, 1f),
                 new TuneValueTemplate(8000000, 3000000),

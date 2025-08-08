@@ -1,4 +1,7 @@
-﻿using Eco.Core.Utils;
+﻿using System;
+using Eco.Core.Utils;
+using Eco.Shared.Localization;
+using Eco.Shared.Logging;
 using Newtonsoft.Json.Linq;
 
 namespace Eco.Mods.MechanicExpansion;
@@ -30,7 +33,7 @@ public struct VehicleTuneData
             CO2EmissionWeights = SafeGetWeightRelation(jObj, "co2_emission_weights", true);
             StorageCapacityWeights = SafeGetWeightRelation(jObj, "storage_capacity_weights");
             DecayMultiplierWeights = SafeGetWeightRelation(jObj, "durability_multiplier_weights", true); 
-            OffroadMultiplierWeights = SafeGetWeightRelation(jObj, "offroad_multiplier_weights", neutral: true);
+            OffroadMultiplierWeights = SafeGetWeightRelation(jObj, "offroad_multiplier_weights", neutral: false);
         }
 
         public static TuneValues SafeGetWeightRelation(JToken jObj, string key, bool isLowerBetter=false, bool neutral=false)
@@ -48,19 +51,23 @@ public struct VehicleTuneData
             float[] evalutedDrags = new float[tunes.Length];
             for (int tuneInd = 0; tuneInd < tunes.Length; ++tuneInd)
             {
-                for (int inputInd = 0; inputInd < tunes[tuneInd]; ++inputInd) 
+                for (int inputInd = 0; inputInd < tunes.Length; ++inputInd) 
                 {
                     if (tuneInd == inputInd) continue;
-                    evalutedDrags[tuneInd] += tunes[inputInd] * TuneManager.DRAGS[inputInd][tuneInd] * (GetWeightRelation(inputInd).isLowerBetter ? 1 : -1);
+                    if (tunes[inputInd] <= 0)
+                    {
+                        continue;
+                    }
+                    evalutedDrags[tuneInd] -= tunes[inputInd] * TuneManager.DRAGS[inputInd][tuneInd];
                 }
             }
             return new EvaluatedData(
-                MaxSpeedWeights.EvaluateInput(tunes[0]) + evalutedDrags[0],
-                FuelConsumptionWeights.EvaluateInput(tunes[1]) + evalutedDrags[1],
-                CO2EmissionWeights.EvaluateInput(tunes[2]) + evalutedDrags[2],
-                (int) Math.Round(StorageCapacityWeights.EvaluateInput(tunes[3]) + evalutedDrags[3]),
-                DecayMultiplierWeights.EvaluateInput(tunes[4]) + evalutedDrags[4],
-                (float)Math.Round(OffroadMultiplierWeights.EvaluateInput(tunes[5]), 2) + evalutedDrags[5]
+                MaxSpeedWeights.EvaluateInput(tunes[0] + evalutedDrags[0]),
+                FuelConsumptionWeights.EvaluateInput(tunes[1] + evalutedDrags[1]),
+                CO2EmissionWeights.EvaluateInput(tunes[2] + evalutedDrags[2]),
+                (int) Math.Round(StorageCapacityWeights.EvaluateInput(tunes[3] + evalutedDrags[3])),
+                DecayMultiplierWeights.EvaluateInput(tunes[4] + evalutedDrags[4]),
+                (float)Math.Round(OffroadMultiplierWeights.EvaluateInput(tunes[5] + evalutedDrags[5]), 2)
             );
         }
 

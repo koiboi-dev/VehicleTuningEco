@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using Eco.Core.Controller;
 using Eco.Core.Utils;
@@ -98,7 +99,7 @@ namespace Eco.Mods.MechanicExpansion
             base.Initialize();
         }
         
-        public static SkillModifiedValue MechanicSkillBonusPoint = new SkillModifiedValue(1f, VehicleHandlingSkill.MultiplicativeStrategy, typeof(VehicleHandlingSkill), typeof(TuneableComponent), new LocString("Lets you drive more calorie efficiently"), DynamicValueType.LaborEfficiency);
+        public static SkillModifiedValue MechanicSkillBonusPoint = new SkillModifiedValue(1f, VehicleHandlingSkill.MultiplicativeStrategy, typeof(VehicleHandlingSkill), typeof(TuneableComponent), new LocString("Lets you drive more efficiently"), DynamicValueType.LaborEfficiency);
         public static TalentModifiedValue TalentBonus = new TalentModifiedValue(typeof(TuneableComponent), typeof(DrivingEfficiencyTalent), 1F);
         public static MultiDynamicValue EfficiencyValue = new MultiDynamicValue(MultiDynamicOps.Multiply, MechanicSkillBonusPoint, TalentBonus);
         private Player? prevDriver = null;
@@ -139,9 +140,9 @@ namespace Eco.Mods.MechanicExpansion
                     <color={data.CO2EmissionWeights.GetColorFromEvaluated(tuneData.CO2EmissionValue)}>Emissions: {tuneData.CO2EmissionValue:0.00}</color> ppm/hour
                     <color={data.StorageCapacityWeights.GetColorFromEvaluated(tuneData.StorageCapacityValue)}>Storage Capacity: {tuneData.StorageCapacityValue / 1000:0}</color> kg
                     <color={data.DecayMultiplierWeights.GetColorFromEvaluated(tuneData.DecayMultiplier)}>Decay Multiplier: {tuneData.DecayMultiplier * 100:0.0}</color>
-                    <color={data.OffroadMultiplierWeights.GetColorFromEvaluated(tuneData.OffroadMultiplier)}>Road Speed Multiplier: {tuneData.OffroadMultiplier*100:0.0}</color> %)
+                    <color={data.OffroadMultiplierWeights.GetColorFromEvaluated(tuneData.OffroadMultiplier)}>Road Speed Multiplier: {tuneData.OffroadMultiplier*100:0.0}</color> %
                     
-                    Road Speed Multiplier determines how much the vehicle will be affected by the road type, lower values means off-roading will be less effective<br>. However, better terrain wont speed up the vehicle as much. Higher numbers will correspond to higher speeds on roads.
+                    Road Speed Multiplier determines how much the vehicle will be affected by the road type, lower values means that good road types will provide less of a multiplier.
                     """;
         }
 
@@ -155,7 +156,7 @@ namespace Eco.Mods.MechanicExpansion
                     <color={data.CO2EmissionWeights.GetColorFromEvaluated(tuneData.CO2EmissionValue)}>Emissions: {tuneData.CO2EmissionValue:0.00}</color> ppm/hour
                     <color={data.StorageCapacityWeights.GetColorFromEvaluated(tuneData.StorageCapacityValue)}>Storage Capacity: {tuneData.StorageCapacityValue / 1000:0}</color> kg
                     <color={data.DecayMultiplierWeights.GetColorFromEvaluated(tuneData.DecayMultiplier)}>Decay Multiplier: {tuneData.DecayMultiplier * 100:0.0}</color>
-                    <color={data.OffroadMultiplierWeights.GetColorFromEvaluated(tuneData.OffroadMultiplier)}>Road Speed Multiplier: {tuneData.OffroadMultiplier*100:0.0}</color> %)
+                    <color={data.OffroadMultiplierWeights.GetColorFromEvaluated(tuneData.OffroadMultiplier)}>Road Speed Multiplier: {tuneData.OffroadMultiplier*100:0.0}</color> %
                     """;
         }
     }

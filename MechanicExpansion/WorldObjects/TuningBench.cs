@@ -32,13 +32,24 @@ namespace Eco.Mods.MechanicExpansion
     [Ecopedia("Work Stations", "Craft Tables", subPageName: "Tuning Bench")]
     public partial class TuningBenchObject : WorldObject, IRepresentsItem, IOperatingWorldObjectComponent
     {
+        public override LocString DisplayName { get { return Localizer.DoStr("Tuning Bench"); } }
         public virtual Type RepresentedItemType => typeof(TuningBenchItem);
 
         static TuningBenchObject()
         {
             var BlockOccupancyList = new List<BlockOccupancy>
             {
-                new BlockOccupancy(new Vector3i(0, 0, 0))
+                new BlockOccupancy(new Vector3i(0, 0, 0)),
+                new BlockOccupancy(new Vector3i(1, 0, 0)),
+                new BlockOccupancy(new Vector3i(-1, 0, 0)),
+                
+                new BlockOccupancy(new Vector3i(0, 1, 0)),
+                new BlockOccupancy(new Vector3i(1, 1, 0)),
+                new BlockOccupancy(new Vector3i(-1, 1, 0)),
+                
+                new BlockOccupancy(new Vector3i(0, 2, 0)),
+                new BlockOccupancy(new Vector3i(1, 2, 0)),
+                new BlockOccupancy(new Vector3i(-1, 2, 0))
             };
             WorldObject.AddOccupancy<TuningBenchObject>(BlockOccupancyList);
         }
@@ -66,11 +77,6 @@ namespace Eco.Mods.MechanicExpansion
     [Weight(2000)]
     [MaxStackSize(2)]
     [Ecopedia("Work Stations", "Craft Tables", createAsSubPage: true)]
-    /*[AllowPluginModules(ItemTypes = new Type[]
-    {
-        typeof(SteamTruckItem),
-        typeof(TruckItem)
-    })]*/
     public partial class TuningBenchItem : WorldObjectItem<TuningBenchObject>, IPersistentData
     {
         protected override OccupancyContext GetOccupancyContext => new SideAttachedContext( 0  | DirectionAxisFlags.Down , WorldObject.GetOccupancyInfo(this.WorldObjectType));
@@ -79,7 +85,7 @@ namespace Eco.Mods.MechanicExpansion
     }
     
     [RequiresSkill(typeof(MechanicsSkill), 1)]
-    [Ecopedia("Work Stations", "Craft Tables", subPageName: "Hydrotable Item")]
+    [Ecopedia("Work Stations", "Craft Tables", subPageName: "Tuning Bench")]
     public partial class TuningBenchRecipe : RecipeFamily
     {
         public TuningBenchRecipe()
@@ -90,8 +96,6 @@ namespace Eco.Mods.MechanicExpansion
                 displayName: Localizer.DoStr("Tuning Bench"),
                 ingredients: new List<IngredientElement>
                 {
-                    new IngredientElement("IronBar", 12, typeof(MechanicsSkill), typeof(MechanicsLavishResourcesTalent)),
-                    new IngredientElement("CastIronStove", 1.5f, typeof(MechanicsSkill), typeof(MechanicsLavishResourcesTalent)),
                 },
                 items: new List<CraftingElement>
                 {
@@ -107,7 +111,7 @@ namespace Eco.Mods.MechanicExpansion
             this.CraftMinutes = CreateCraftTimeValue(beneficiary: typeof(TuningBenchRecipe), start: 8, skillType: typeof(MechanicsSkill), typeof(MechanicsFocusedSpeedTalent), typeof(MechanicsParallelSpeedTalent));
             
             this.ModsPreInitialize();
-            this.Initialize(displayText: Localizer.DoStr("Tuning Table"), recipeType: typeof(TuningBenchRecipe));
+            this.Initialize(displayText: Localizer.DoStr("Tuning Bench"), recipeType: typeof(TuningBenchRecipe));
             this.ModsPostInitialize();
 
             // Register our RecipeFamily instance with the crafting system so it can be crafted.
