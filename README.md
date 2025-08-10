@@ -29,9 +29,7 @@ Vehicle Handling is a new specialty for the scientist. The skill allows for a re
 Vehicle Handling also has one talent, where the player can choose between 6 bonus skillpoints or 25% calorie reduction when driving.
 
 ## Configurability
-All of the values in the mod are fully configurable in the MechanicsExpansion.eco config.
-
-**!!! All configs must be done while the server is offline, as otherwise they will be removed when the server stops. !!!**
+All of the values in the mod are fully configurable in the VehicleTuning.eco config.
 
 ### Drag Config
 Drags are configured as a 2D array, the outer array determines what needs to be raised, while the inner array determines what is being raised. 
