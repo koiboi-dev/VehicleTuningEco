@@ -14,14 +14,18 @@ namespace Eco.Mods.MechanicExpansion
     {
         public static ModRegistration Register() => new()
         {
-            ModName = "MechanicExpansion",
+            ModName = "VehicleTuning",
             ModDescription = "Lets you tune vehicles",
-            ModDisplayName = "Mechanic Expansion"
+            ModDisplayName = "Vehicle Tuning"
         };
     }
     
     public class MechanicExpansion : IModKitPlugin, IInitializablePlugin, IShutdownablePlugin
     {
+        // TODO: Mod.io photos
+        // TODO: Small balance adjust
+        // TODO: Maybe talent textures? dont really matter tho :P
+        
         public string status = "Uninitialized";
 		
         public string GetStatus()
@@ -41,7 +45,7 @@ namespace Eco.Mods.MechanicExpansion
 
         public async void Initialize(TimedTask timer)
         {
-	        Log.WriteLine(new LocString("Initializing Mechanic Expansion"));
+	        Log.WriteLine(new LocString("Initializing Vehicle Tuning"));
             
             TuneManager.Initalize();
 
@@ -74,7 +78,7 @@ namespace Eco.Mods.MechanicExpansion
             
             TuneManager.AddVehicle<TruckItem>(
                 new TuneValueTemplate(20, 4, 5),
-                new TuneValueTemplate(250, 50, 100),
+                new TuneValueTemplate(250, 75, 110),
                 new TuneValueTemplate(0.5f, 0.2f, 1f),
                 new TuneValueTemplate(8000000, 3000000),
                 new TuneValueTemplate(1, 0.8f),
@@ -97,6 +101,11 @@ namespace Eco.Mods.MechanicExpansion
                 new TuneValueTemplate(1, 0.8f),
                 new TuneValueTemplate(1, 0.35f, 0.5f)
             );
+
+            if (TuneManager.REPLACE_FILE)
+            {
+                TuneManager.SaveVehicleRelations(); // We "save" the default values to the file, users may want to edit it on first boot.
+            }
             
             status = "Running";
         }

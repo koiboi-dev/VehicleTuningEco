@@ -16,9 +16,10 @@ namespace Eco.Mods.MechanicExpansion
     {
         public static int TUNE_COUNT = 6;
         private static bool Initialized = false;
-        private static readonly String FILE_NAME = "./Configs/MechanicExpansion.Eco";
-        private static readonly String BACKUP_FILE_NAME = "./Configs/MechanicExpansionBackup.Eco";
-        private static readonly int VERSION = 2;
+        private static readonly String FILE_NAME = "./Configs/VehicleTuning.Eco";
+        private static readonly String BACKUP_FILE_NAME = "./Configs/VehicleTuningBackup.Eco";
+        private static readonly int VERSION = 3;
+        public static bool REPLACE_FILE = false;
         
         public static float[][] DRAGS = new[]
         {
@@ -34,23 +35,33 @@ namespace Eco.Mods.MechanicExpansion
 
         private static void LoadVehicleRelations()
         {
-            bool isFirst = false;
+            /*bool isFirst = false;
             if (!File.Exists(FILE_NAME))
             {
                 File.WriteAllText(FILE_NAME, "{'vehicle_tunes':{}}");
                 isFirst = true;
+            }*/
+
+            if (!File.Exists(FILE_NAME))
+            {
+                Log.WriteError(Localizer.DoStr("No config file found, generating default one...\n If you wish to modify the tune values you will need to restart the server."));
+                File.WriteAllText(FILE_NAME, $"{{'version':{VERSION}, 'vehicle_tunes': []}}");
+                REPLACE_FILE = true;
+                return;
             }
             
             JObject expansionFile = JToken.ReadFrom((JsonReader)new JsonTextReader((TextReader)File.OpenText(FILE_NAME))) as JObject;
-            if (!isFirst &&( expansionFile["version"] is null || (int)expansionFile["version"] != VERSION))
+            if (expansionFile["version"] is null || (int)expansionFile["version"] != VERSION)
             {
-                Log.WriteError(Localizer.Do($"ERROR: MechanicsExpansion.Eco is of data version {expansionFile["version"]} however, MechanicExpansion is expecting version {VERSION}.\nAll tune values WILL be reset on the next server start. To keep the data a backup file has been made with the current values. \nAfter a reset ensuring that the new file has version '{VERSION}', you can replace all the values under 'tune' with their corresponding values in the old file."));
+                Log.WriteError(Localizer.Do($"ERROR: VehicleTuning.Eco is of data version {expansionFile["version"]} however, VehicleTuning is expecting version {VERSION}.\n VehicleTuning"));
                 File.Copy(FILE_NAME, BACKUP_FILE_NAME, true);
+                REPLACE_FILE = true;
             }
 
             if (expansionFile["vehicle_tunes"] == null)
             {
                 Log.WriteError(Localizer.Do($"ERROR: Unable to load file due to missing tune array, using defaults instead."));
+                REPLACE_FILE = true;
                 return;
             }
             JObject weightArray = (JObject)expansionFile["vehicle_tunes"];
@@ -74,6 +85,7 @@ namespace Eco.Mods.MechanicExpansion
             if (expansionFile["drags"] == null)
             {
                 Log.WriteError(Localizer.Do($"ERROR: Unable to load custom drags due to missing JSON data."));
+                REPLACE_FILE = true;
                 return;
             }
             DRAGS = ((JArray)expansionFile["drags"]).ToObject<float[][]>();
@@ -163,7 +175,10 @@ namespace Eco.Mods.MechanicExpansion
         
         public static void Deinitalize()
         {
-            SaveVehicleRelations();
+            /*if (REPLACE_FILE)
+            {
+                SaveVehicleRelations();
+            }*/
         }
 
         public static VehicleTuneData GetTuneRelation(Type vType)

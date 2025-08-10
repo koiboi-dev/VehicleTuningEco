@@ -42,10 +42,20 @@ namespace Eco.Mods.MechanicExpansion
         #endregion
     }*/
     
-    [Serialized]
+    /*[Serialized]
     public class TuneBar: IController, INotifyPropertyChanged
     {
-        [Eco] [Serialized, SyncToView, Range(-10, 10)] public int Tune { 
+        [Autogen]
+        [SyncToView]
+        [UITypeName("StringTitle")]
+        [PropReadOnly]
+        public string NameTitle
+        {
+            get => name;
+        }
+        
+        [Eco] [Serialized, SyncToView(""), Range(-10, 10)]
+        public int Tune { 
             get => tune;
             set
             {
@@ -55,12 +65,19 @@ namespace Eco.Mods.MechanicExpansion
         }
         private int tune;
         
+        private string name = "Tune";
+
+        public TuneBar(string name)
+        {
+            this.name = name;
+        }
+        
         #region IController
         public event PropertyChangedEventHandler PropertyChanged;
         int controllerID;
         public ref int ControllerID => ref this.controllerID;
         #endregion
-    }
+    }*/
     
     [Serialized]
     [Priority(-2)]
@@ -101,10 +118,76 @@ namespace Eco.Mods.MechanicExpansion
         [Serialized]
         public Inventory Inventory { get; set; }
         
-        [Serialized, Eco,SyncToView, HideRoot, NewTooltipChildren(CacheAs.Instance)]
+        /*[Serialized, Eco,SyncToView, HideRoot, NewTooltipChildren(CacheAs.Instance)]
         [VisibilityParam("HasTunableItem")]
         [ShowFullObject]
-        public TuneBar[] TuneBars { get; set; }
+        public TuneBar[] TuneBars { get; set; }*/
+        
+        [Eco] [Serialized, SyncToView, Range(-10, 10)] [VisibilityParam("HasTunableItem")]
+        public int MaxSpeedTune { 
+            get => _maxSpeedTune;
+            set
+            {
+                _maxSpeedTune = Math.Clamp(value, -10, 10);
+                this.Changed(nameof(MaxSpeedTune));
+            }
+        }
+        private int _maxSpeedTune;
+        
+        [Eco] [Serialized, SyncToView, Range(-10, 10)] [VisibilityParam("HasTunableItem")]
+        public int FuelEfficiencyTune { 
+            get => _fuelEfficiencyTune;
+            set
+            {
+                _fuelEfficiencyTune = Math.Clamp(value, -10, 10);
+                this.Changed(nameof(FuelEfficiencyTune));
+            }
+        }
+        private int _fuelEfficiencyTune;
+        
+        [Eco] [Serialized, SyncToView("Co2 Emissions Tune"), Range(-10, 10)] [VisibilityParam("HasTunableItem")]
+        public int Co2EmissionsTune { 
+            get => _co2EmissionsTune;
+            set
+            {
+                _co2EmissionsTune = Math.Clamp(value, -10, 10);
+                this.Changed(nameof(Co2EmissionsTune));
+            }
+        }
+        private int _co2EmissionsTune;
+        
+        [Eco] [Serialized, SyncToView, Range(-10, 10)] [VisibilityParam("HasTunableItem")]
+        public int StorageCapacityTune { 
+            get => _storageCapacityTune;
+            set
+            {
+                _storageCapacityTune = Math.Clamp(value, -10, 10);
+                this.Changed(nameof(StorageCapacityTune));
+            }
+        }
+        private int _storageCapacityTune;
+        
+        [Eco] [Serialized, SyncToView, Range(-10, 10)] [VisibilityParam("HasTunableItem")]
+        public int DecayMultiplierTune { 
+            get => _decayMultiplierTune;
+            set
+            {
+                _decayMultiplierTune = Math.Clamp(value, -10, 10);
+                this.Changed(nameof(DecayMultiplierTune));
+            }
+        }
+        private int _decayMultiplierTune;
+        
+        [Eco] [Serialized, SyncToView, Range(-10, 10)] [VisibilityParam("HasTunableItem")]
+        public int RoadSpeedTune { 
+            get => _roadSpeedTune;
+            set
+            {
+                _roadSpeedTune = Math.Clamp(value, -10, 10);
+                this.Changed(nameof(RoadSpeedTune));
+            }
+        }
+        private int _roadSpeedTune;
 
         [Autogen]
         [SyncToView]
@@ -129,19 +212,27 @@ namespace Eco.Mods.MechanicExpansion
         {
             Inventory = new AuthorizationInventory(1);
         }
-        
+
+        private static string[] toolBarNames = {"Max Speed", "Fuel Efficiency", "Co2 Emissions", "Storage Capacity", "Decay Rate", "Road Multiplier"};
         public override void Initialize()
         {
             HasTunableItem = false;
             base.Initialize();
             //this.Parent.GetComponent<PluginModulesComponent>().OnChanged.Add(OnVehicleAdded);
             Inventory.OnChanged.Add(OnVehicleAdded);
-            TuneBars = new TuneBar[TuneManager.TUNE_COUNT];
+            /*TuneBars = new TuneBar[TuneManager.TUNE_COUNT];
             for (int i = 0; i < TuneBars.Length; i++)
             {
-                TuneBars[i] = new TuneBar();
+                TuneBars[i] = new TuneBar(toolBarNames[i]);
                 TuneBars[i].Subscribe(nameof(TuneBar.Tune), OnTuneChanged);
-            }
+            }*/
+            this.Subscribe(nameof(MaxSpeedTune), OnTuneChanged);
+            this.Subscribe(nameof(FuelEfficiencyTune), OnTuneChanged);
+            this.Subscribe(nameof(Co2EmissionsTune), OnTuneChanged);
+            this.Subscribe(nameof(StorageCapacityTune), OnTuneChanged);
+            this.Subscribe(nameof(DecayMultiplierTune), OnTuneChanged);
+            this.Subscribe(nameof(RoadSpeedTune), OnTuneChanged);
+            
             Inventory.SetOwner(Parent);
         }
 
@@ -199,7 +290,8 @@ namespace Eco.Mods.MechanicExpansion
                 int[] tuneValues = new int[TuneManager.TUNE_COUNT];
                 for (int i = 0; i < TuneManager.TUNE_COUNT; i++)
                 {
-                    tuneValues[i] = TuneBars[i].Tune;
+                    //tuneValues[i] = TuneBars[i].Tune;
+                    tuneValues[i] = GetTuneLevel(i);
                 }
                 EvaluatedData evalData = TuneManager.EvaluateVehicle(item.Item.GetType(), tuneValues);
                 if (item.Item is IPersistentData data && data.PersistentData is ItemPersistentData itemData)
@@ -225,17 +317,21 @@ namespace Eco.Mods.MechanicExpansion
         public float GetCalorieCost()
         {
             int absSum = 0;
-            foreach (TuneBar bar in TuneBars)
+            /*foreach (TuneBar bar in TuneBars)
             {
                 absSum += Math.Abs(bar.Tune);
+            }*/
+            for (int i = 0; i < TuneManager.TUNE_COUNT; i++)
+            {
+                absSum += Math.Abs(GetTuneLevel(i));
             }
 
-            return absSum * 100;
+            return Math.Clamp(absSum * 100, 500, 2600);
         }
 
         public void OnTuneChanged()
         {
-            this.Changed(nameof(TuneBars));
+            //this.Changed(nameof(TuneBars));
             this.Changed(nameof(TuneValueString));
             HasTuneChanged = true;
         }
@@ -265,7 +361,9 @@ namespace Eco.Mods.MechanicExpansion
                 $"""
                  Current Tuner: {vehicleAddedUser.Name}
                  Available Points: <color={GetPointsColor(vehicleData)}>{GetPoints(vehicleData)}</color>
-                 Bonus Points: <color=green>{MechanicSkillBonusPoint.GetCurrentValueInt(new UserDynamicValueContext(vehicleAddedUser), this)}</color>
+                 Level Points: <color=green>{MechanicSkillBonusPoint.GetCurrentValueInt(new UserDynamicValueContext(vehicleAddedUser), this)}</color>
+                 Talent Points: <color=green>{TalentBonus.GetCurrentValueInt(new UserDynamicValueContext(vehicleAddedUser), this)}</color>
+                 
                  <color={vehicleData.MaxSpeedWeights.GetColorFromEvaluated(data.Value.MaxSpeedValue)}>Max Speed: {data.Value.MaxSpeedValue:0.0}</color> kmph ({GetTrendIcon(data.Value.MaxSpeedValue, PrevData.Value.MaxSpeedValue)})
                  <color={vehicleData.FuelConsumptionWeights.GetColorFromEvaluated(data.Value.FuelConsumptionValue)}>Fuel Consumption: {data.Value.FuelConsumptionValue:0}</color> joules/s ({GetTrendIcon(data.Value.FuelConsumptionValue, PrevData.Value.FuelConsumptionValue, true)})
                  <color={vehicleData.CO2EmissionWeights.GetColorFromEvaluated(data.Value.CO2EmissionValue)}>Emissions: {data.Value.CO2EmissionValue:0.00}</color> ppm/hour ({GetTrendIcon(data.Value.CO2EmissionValue, PrevData.Value.CO2EmissionValue, true)})
@@ -317,9 +415,9 @@ namespace Eco.Mods.MechanicExpansion
         public int GetPoints(VehicleTuneData data)
         {
             int points = 0;
-            for (int i = 0; i < TuneBars.Length; i++)
+            for (int i = 0; i < TuneManager.TUNE_COUNT; i++)
             {
-                points -= data[i+1].GetPointCost(TuneBars[i].Tune);
+                points -= data[i+1].GetPointCost(GetTuneLevel(i));
             }
 
             if (vehicleAddedUser != null)
@@ -352,9 +450,31 @@ namespace Eco.Mods.MechanicExpansion
             int[] tuneValues = new int[TuneManager.TUNE_COUNT];
             for (int i = 0; i < TuneManager.TUNE_COUNT; i++)
             {
-                tuneValues[i] = TuneBars[i].Tune;
+                tuneValues[i] = GetTuneLevel(i);
             }
             return TuneManager.EvaluateVehicle(item.Item.GetType(), tuneValues);
+        }
+
+        public int GetTuneLevel(int index)
+        {
+            // Not good at all, but it lets me name each tune value for users in-game...
+            switch (index)
+            {
+                case 0:
+                    return _maxSpeedTune;
+                case 1:
+                    return _fuelEfficiencyTune;
+                case 2:
+                    return _co2EmissionsTune;
+                case 3:
+                    return _storageCapacityTune;
+                case 4:
+                    return _decayMultiplierTune;
+                case 5:
+                    return _roadSpeedTune;
+            }
+
+            return 0;
         }
     }
 }

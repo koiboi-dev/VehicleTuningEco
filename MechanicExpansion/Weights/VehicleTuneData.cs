@@ -33,7 +33,7 @@ public struct VehicleTuneData
             CO2EmissionWeights = SafeGetWeightRelation(jObj, "co2_emission_weights", true);
             StorageCapacityWeights = SafeGetWeightRelation(jObj, "storage_capacity_weights");
             DecayMultiplierWeights = SafeGetWeightRelation(jObj, "durability_multiplier_weights", true); 
-            OffroadMultiplierWeights = SafeGetWeightRelation(jObj, "offroad_multiplier_weights", neutral: false);
+            OffroadMultiplierWeights = SafeGetWeightRelation(jObj, "offroad_multiplier_weights");
         }
 
         public static TuneValues SafeGetWeightRelation(JToken jObj, string key, bool isLowerBetter=false, bool neutral=false)

@@ -35,7 +35,7 @@ public class TunePointTalent : Talent
 
 [Serialized]
 [LocDisplayName("Driving Efficiency")]
-[LocDescription("Reduces calorie usage while driving by 25%")]
+[LocDescription("Reduces calorie usage while driving by 40%")]
 public class DrivingEfficiencyTalentGroup : TalentGroup
 {
     public DrivingEfficiencyTalentGroup()
@@ -55,6 +55,6 @@ public class DrivingEfficiencyTalent : Talent
     public override Type TalentGroupType { get { return typeof(TunePointTalentGroup); } }
     public DrivingEfficiencyTalent()
     {
-        Value = 0.75f;
+        Value = 1f - 0.4f;
     }
 }

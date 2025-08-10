@@ -75,7 +75,7 @@ public partial class VehicleHandlingSkill : Skill
 
     public override int MaxLevel
     {
-        get { return 9; }
+        get { return 7; }
     }
 
     public override int Tier
