@@ -174,7 +174,6 @@ namespace Eco.Mods.TechTree
             this.ModsPreInitialize();
             base.Initialize();    
             this.GetComponent<VehicleComponent>().HumanPowered(2);
-            this.GetComponent<TuneableComponent>().Initialize( 1, 12, 2500000, 2, 100, 200, 0, true, VehicleUtilities.GetInventoryRestriction(this));
             this.GetComponent<CustomTextComponent>().Initialize(200);
             this.GetComponent<FuelSupplyComponent>().Initialize(2, fuelTagList);
             this.GetComponent<FuelConsumptionComponent>().Initialize(225);
@@ -182,10 +181,12 @@ namespace Eco.Mods.TechTree
             this.GetComponent<ModularVehicleComponent>().Initialize(0, 1, SegmentTypeList, AttachmentTypeList);
             this.GetComponent<MinimapComponent>().InitAsMovable();
             this.GetComponent<MinimapComponent>().SetCategory(Localizer.DoStr("Vehicles"));
-            //this.GetComponent<VehicleComponent>().Initialize(12, 1);
-            // this.GetComponent<VehicleToolComponent>().Initialize(12, 2500000,
-            //100, 200, 0, true, VehicleUtilities.GetInventoryRestriction(this));
+            this.GetComponent<VehicleComponent>().Initialize(12, 1);
+            this.GetComponent<VehicleToolComponent>().Initialize(12, 2500000, 100, 200, 0, true, VehicleUtilities.GetInventoryRestriction(this));
             this.GetComponent<VehicleComponent>().FailDriveMsg = Localizer.Do($"You are too hungry to drive {this.DisplayName}!");
+            
+            this.GetComponent<TuneableComponent>().Initialize( 1, 12, 2500000, 2, 100, 200, 0, true, VehicleUtilities.GetInventoryRestriction(this));
+            
             this.ModsPostInitialize();
                         {
                 this.GetComponent<PartsComponent>().Config(() => LocString.Empty, new PartInfo[]

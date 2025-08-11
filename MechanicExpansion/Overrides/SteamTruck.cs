@@ -160,17 +160,18 @@ namespace Eco.Mods.TechTree
             this.ModsPreInitialize();
             base.Initialize();       
             this.GetComponent<VehicleComponent>().HumanPowered(1);
-            GetComponent<TuneableComponent>().Initialize( 2, 24, 5000000, 1);
             this.GetComponent<CustomTextComponent>().Initialize(200);
             this.GetComponent<FuelSupplyComponent>().Initialize(2, fuelTagList);
-            //this.GetComponent<FuelConsumptionComponent>().Initialize(300);
-            //this.GetComponent<AirPollutionComponent>().Initialize(0.2f);
+            this.GetComponent<FuelConsumptionComponent>().Initialize(300);
+            this.GetComponent<AirPollutionComponent>().Initialize(0.2f);
             this.GetComponent<StockpileComponent>().Initialize(new Vector3i(2,2,3));
             this.GetComponent<PublicStorageComponent>().Initialize(24, 5000000);
             this.GetComponent<MinimapComponent>().InitAsMovable();
             this.GetComponent<MinimapComponent>().SetCategory(Localizer.DoStr("Vehicles"));
-            //this.GetComponent<VehicleComponent>().Initialize(18, 3,2);
+            this.GetComponent<VehicleComponent>().Initialize(18, 3,2);
             this.GetComponent<VehicleComponent>().FailDriveMsg = Localizer.Do($"You are too hungry to drive {this.DisplayName}!");
+            
+            GetComponent<TuneableComponent>().Initialize( 2, 24, 5000000, 1);
             this.ModsPostInitialize();
                         {
                 this.GetComponent<PartsComponent>().Config(() => LocString.Empty, new PartInfo[]
