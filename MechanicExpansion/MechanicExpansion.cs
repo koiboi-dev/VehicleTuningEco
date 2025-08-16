@@ -22,10 +22,6 @@ namespace Eco.Mods.MechanicExpansion
     
     public class MechanicExpansion : IModKitPlugin, IInitializablePlugin, IShutdownablePlugin
     {
-        // TODO: Mod.io photos
-        // TODO: Small balance adjust
-        // TODO: Maybe talent textures? dont really matter tho :P
-        
         public string status = "Uninitialized";
 		
         public string GetStatus()

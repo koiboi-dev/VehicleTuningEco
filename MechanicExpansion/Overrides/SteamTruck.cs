@@ -171,7 +171,7 @@ namespace Eco.Mods.TechTree
             this.GetComponent<VehicleComponent>().Initialize(18, 3,2);
             this.GetComponent<VehicleComponent>().FailDriveMsg = Localizer.Do($"You are too hungry to drive {this.DisplayName}!");
             
-            GetComponent<TuneableComponent>().Initialize( 2, 24, 5000000, 1);
+            GetComponent<TuneableComponent>().Initialize( 2, 24, 5000000, 1); // <-- Right here
             this.ModsPostInitialize();
                         {
                 this.GetComponent<PartsComponent>().Config(() => LocString.Empty, new PartInfo[]

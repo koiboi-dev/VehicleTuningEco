@@ -185,7 +185,7 @@ namespace Eco.Mods.TechTree
             this.GetComponent<VehicleToolComponent>().Initialize(12, 2500000, 100, 200, 0, true, VehicleUtilities.GetInventoryRestriction(this));
             this.GetComponent<VehicleComponent>().FailDriveMsg = Localizer.Do($"You are too hungry to drive {this.DisplayName}!");
             
-            this.GetComponent<TuneableComponent>().Initialize( 1, 12, 2500000, 2, 100, 200, 0, true, VehicleUtilities.GetInventoryRestriction(this));
+            this.GetComponent<TuneableComponent>().Initialize( 1, 12, 2500000, 2, 100f, 200f, 0f, true);
             
             this.ModsPostInitialize();
                         {

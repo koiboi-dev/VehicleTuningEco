@@ -56,7 +56,6 @@ namespace Eco.Mods.MechanicExpansion
         public string ShortString => GetShortString();
 
         private float InitalHumanPoweredValue = 0.5f;
-
         public void Initialize(int mountCount, int storageSlots, int weightCapacity, float initalHumanPowered, params object[] args)
         {
             if (tuneData.MaxSpeedValue == 0)
@@ -84,9 +83,9 @@ namespace Eco.Mods.MechanicExpansion
                 Parent.GetComponent<PublicStorageComponent>()
                     .Initialize(storageSlots + slotChange, tuneData.StorageCapacityValue);
             } else if (Parent.HasComponent<VehicleToolComponent>())
-            { 
+            {
                 Parent.GetComponent<VehicleToolComponent>().Initialize(storageSlots + slotChange, tuneData.StorageCapacityValue,
-                    (float)args[0], (float)args[1], (float)args[2], (bool)args[3], (InventoryRestriction[])args[4]);
+                    (float)args[0], (float)args[1], (float)args[2], (bool)args[3], VehicleUtilities.GetInventoryRestriction(Parent));
             }
 
             if (Parent.HasComponent<PartsComponent>())
