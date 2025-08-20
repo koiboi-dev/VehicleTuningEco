@@ -145,7 +145,7 @@ namespace Eco.Mods.MechanicExpansion
         }
         private int _fuelEfficiencyTune;
         
-        [Eco] [Serialized, SyncToView("Co2 Emissions Tune"), Range(-10, 10)] [VisibilityParam("HasTunableItem")]
+        [Eco] [Serialized, SyncToView, Range(-10, 10)] [VisibilityParam("HasTunableItem")]
         public int Co2EmissionsTune { 
             get => _co2EmissionsTune;
             set
