@@ -136,7 +136,7 @@ namespace Eco.Mods.TechTree
     {
         static TruckObject()
         {
-            WorldObject.AddOccupancy<TruckObject>(new List<BlockOccupancy>()
+            /*WorldObject.AddOccupancy<TruckObject>(new List<BlockOccupancy>()
             {
                 new BlockOccupancy(new Vector3i(0, 0, 0)),
                 new BlockOccupancy(new Vector3i(0, 0, 1)),
@@ -158,7 +158,8 @@ namespace Eco.Mods.TechTree
                 new BlockOccupancy(new Vector3i(1, 1, 2)),
                 new BlockOccupancy(new Vector3i(1, 1, 3)),
                 new BlockOccupancy(new Vector3i(1, 1, 4)),
-            });
+            });*/
+            WorldObject.AddOccupancy<TruckObject>(new List<BlockOccupancy>(0));
         }
         public override TableTextureMode TableTexture => TableTextureMode.Metal;
         public override bool PlacesBlocks            => false;

@@ -131,7 +131,7 @@ namespace Eco.Mods.TechTree
     {
         static PoweredCartObject()
         {
-            WorldObject.AddOccupancy<PoweredCartObject>(new List<BlockOccupancy>(){
+            /*WorldObject.AddOccupancy<PoweredCartObject>(new List<BlockOccupancy>(){
                 new BlockOccupancy(new Vector3i(0, 0, 0)),
                 new BlockOccupancy(new Vector3i(0, 0, 1)),
                 new BlockOccupancy(new Vector3i(0, 0, 2)),
@@ -162,7 +162,8 @@ namespace Eco.Mods.TechTree
                 new BlockOccupancy(new Vector3i(1, 2, 2)),
                 new BlockOccupancy(new Vector3i(1, 2, 3)),
                 new BlockOccupancy(new Vector3i(1, 2, 4)),
-            });
+            });*/
+            WorldObject.AddOccupancy<PoweredCartObject>(new List<BlockOccupancy>(0));
         }
         public override TableTextureMode TableTexture => TableTextureMode.Metal;
         public override bool PlacesBlocks            => false;

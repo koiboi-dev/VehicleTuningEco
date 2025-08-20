@@ -42,16 +42,8 @@ namespace Eco.Mods.MechanicExpansion
                 new BlockOccupancy(new Vector3i(0, 0, 0)),
                 new BlockOccupancy(new Vector3i(1, 0, 0)),
                 new BlockOccupancy(new Vector3i(-1, 0, 0)),
-                
-                new BlockOccupancy(new Vector3i(0, 1, 0)),
-                new BlockOccupancy(new Vector3i(1, 1, 0)),
-                new BlockOccupancy(new Vector3i(-1, 1, 0)),
-                
-                new BlockOccupancy(new Vector3i(0, 2, 0)),
-                new BlockOccupancy(new Vector3i(1, 2, 0)),
-                new BlockOccupancy(new Vector3i(-1, 2, 0))
             };
-            WorldObject.AddOccupancy<TuningBenchObject>(BlockOccupancyList);
+            AddOccupancy<TuningBenchObject>(BlockOccupancyList);
         }
         
         protected override void Initialize()
@@ -77,6 +69,7 @@ namespace Eco.Mods.MechanicExpansion
     [Weight(2000)]
     [MaxStackSize(2)]
     [Ecopedia("Work Stations", "Craft Tables", createAsSubPage: true)]
+    [Tag(nameof(SurfaceTags.CanBeOnRug))] 
     public partial class TuningBenchItem : WorldObjectItem<TuningBenchObject>, IPersistentData
     {
         protected override OccupancyContext GetOccupancyContext => new SideAttachedContext( 0  | DirectionAxisFlags.Down , WorldObject.GetOccupancyInfo(this.WorldObjectType));

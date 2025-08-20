@@ -85,7 +85,7 @@ namespace Eco.Mods.MechanicExpansion
             } else if (Parent.HasComponent<VehicleToolComponent>())
             {
                 Parent.GetComponent<VehicleToolComponent>().Initialize(storageSlots + slotChange, tuneData.StorageCapacityValue,
-                    (float)args[0], (float)args[1], (float)args[2], (bool)args[3], VehicleUtilities.GetInventoryRestriction(Parent));
+                    (float)args[0], (float)args[1], (float)args[2], (bool)args[3], (StackLimitTypeRestriction)args[4]);
             }
 
             if (Parent.HasComponent<PartsComponent>())

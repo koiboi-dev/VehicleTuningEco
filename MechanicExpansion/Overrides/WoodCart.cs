@@ -126,10 +126,11 @@ namespace Eco.Mods.TechTree
     {
         static WoodCartObject()
         {
-            WorldObject.AddOccupancy<WoodCartObject>(new List<BlockOccupancy>(){
+            /*WorldObject.AddOccupancy<WoodCartObject>(new List<BlockOccupancy>(){
                 new BlockOccupancy(new Vector3i(0, 0, 0)),
                 new BlockOccupancy(new Vector3i(0, 0, 1)),
-            });
+            });*/
+            WorldObject.AddOccupancy<WoodCartObject>(new List<BlockOccupancy>(0));
         }
         public override TableTextureMode TableTexture => TableTextureMode.Wood;
         public override bool PlacesBlocks            => false;

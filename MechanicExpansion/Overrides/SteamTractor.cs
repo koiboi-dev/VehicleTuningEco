@@ -136,7 +136,7 @@ namespace Eco.Mods.TechTree
     {
         static SteamTractorObject()
         {
-            WorldObject.AddOccupancy<SteamTractorObject>(new List<BlockOccupancy>(){
+            /*WorldObject.AddOccupancy<SteamTractorObject>(new List<BlockOccupancy>(){
                         new BlockOccupancy(new Vector3i(0, 0, 0)),
                         new BlockOccupancy(new Vector3i(0, 0, 1)),
                         new BlockOccupancy(new Vector3i(0, 0, 2)),
@@ -149,7 +149,9 @@ namespace Eco.Mods.TechTree
                         new BlockOccupancy(new Vector3i(1, 1, 0)),
                         new BlockOccupancy(new Vector3i(1, 1, 1)),
                         new BlockOccupancy(new Vector3i(1, 1, 2)),
-                        });
+                        });*/
+            AddOccupancy<SteamTractorObject>(new List<BlockOccupancy>());
+            tractorMap.AddListRestriction(ItemUtils.GetItemsByTag("Seeds", "Crop"), 500);
         }
         public override TableTextureMode TableTexture => TableTextureMode.Metal;
         public override bool PlacesBlocks            => false;
@@ -160,7 +162,14 @@ namespace Eco.Mods.TechTree
         {
             "Burnable Fuel",
         };
-        private SteamTractorObject() { }
+
+        public static StackLimitTypeRestriction tractorMap = new StackLimitTypeRestriction();
+        
+        
+        private SteamTractorObject()
+        {
+            
+        }
         private static readonly Type[] SegmentTypeList = Array.Empty<Type>();
         private static readonly Type[] AttachmentTypeList = new Type[]
         {
@@ -182,10 +191,11 @@ namespace Eco.Mods.TechTree
             this.GetComponent<MinimapComponent>().InitAsMovable();
             this.GetComponent<MinimapComponent>().SetCategory(Localizer.DoStr("Vehicles"));
             this.GetComponent<VehicleComponent>().Initialize(12, 1);
-            this.GetComponent<VehicleToolComponent>().Initialize(12, 2500000, 100, 200, 0, true, VehicleUtilities.GetInventoryRestriction(this));
+            //this.GetComponent<VehicleToolComponent>().Initialize(12, 2500000, 100, 200, 0, true, tractorMap);
             this.GetComponent<VehicleComponent>().FailDriveMsg = Localizer.Do($"You are too hungry to drive {this.DisplayName}!");
             
-            this.GetComponent<TuneableComponent>().Initialize( 1, 12, 2500000, 2, 100f, 200f, 0f, true);
+            
+            this.GetComponent<TuneableComponent>().Initialize( 1, 12, 2500000, 2, 100f, 200f, 0f, true, tractorMap);
             
             this.ModsPostInitialize();
                         {

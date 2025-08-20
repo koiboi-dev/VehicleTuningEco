@@ -34,7 +34,7 @@ namespace Eco.Mods.TechTree
             // Skidsteer (same as excavator currently)
             AdvancedVehicleStackSizeMap.Add(typeof(SkidSteerObject), excavatorMap);
 
-            // Tractor - Removed for tuning reasons !!!
+            // Tractor
             //var tractorMap = new StackLimitTypeRestriction();
             //tractorMap.AddListRestriction(ItemUtils.GetItemsByTag("Seeds", "Crop"), 500);
             //AdvancedVehicleStackSizeMap.Add(typeof(SteamTractorObject), tractorMap);
