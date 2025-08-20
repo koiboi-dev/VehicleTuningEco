@@ -95,11 +95,14 @@ If you have a vehicle mod and would like to make it compatible with vehicle tuni
 2. Make your vehicle(s) require the TuneableComponent class as shown below
    <img width="736" height="153" alt="image" src="https://github.com/user-attachments/assets/3c37043f-51af-48d9-a7d2-3f1f3b5eb035" />
 
-4. Initalize the TuneableComponent class prior to initalising the VehicleComponent class. Pass in any matching values into the instantiate method, they should be the same as the vehicle component instantiation. You also need to pass in the HumanPowered value here, or 0 if there is none.
-  <img width="1147" height="428" alt="image" src="https://github.com/user-attachments/assets/50c7b4ad-bce4-4d8b-a5ef-5b93b4f4de1c" />
-5. Create a IInitializablePlugin class and call TuneManager.AddVehicle<YOUR_VEHICLE_CLASS>(), along with any default tunes represented by TuneDataTemplates.
+4. Initalize the TuneableComponent class after initalising the VehicleComponent class. Pass in any matching values into the instantiate method, they should be the same as the vehicle component instantiation. You should not remove any .Initalize methods you already implemented so it can remain an optional dependancy. You also need to pass in the HumanPowered value here, or 0 if there is none.
+  <img width="1297" height="523" alt="image" src="https://github.com/user-attachments/assets/c30a9571-6729-4bd0-943d-7fd19c4131e1" />
+
+7. Create a IInitializablePlugin class and call TuneManager.AddVehicle<YOUR_VEHICLE_CLASS>(), along with any default tunes represented by TuneDataTemplates.
 <img width="804" height="242" alt="image" src="https://github.com/user-attachments/assets/e411e895-b134-4554-ad33-a31840cc5d04" />
 
 If you have a vehicle that uses VehicleToolComponent for storage, you can pass in the extra arguments into the param args section of the initalize function, such as:
 
     this.GetComponent<TuneableComponent>().Initialize( 1, 12, 2500000, 2, 100, 200, 0, true, VehicleUtilities.GetInventoryRestriction(this));
+
+For any further inquires contact kot0s
