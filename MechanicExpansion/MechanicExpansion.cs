@@ -14,7 +14,7 @@ namespace Eco.Mods.MechanicExpansion
     {
         public static ModRegistration Register() => new()
         {
-            ModName = "VehicleTuning",
+            ModName = "vehicle-tuning",
             ModDescription = "Lets you tune vehicles",
             ModDisplayName = "Vehicle Tuning"
         };
