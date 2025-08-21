@@ -1,4 +1,0 @@
-namespace Eco.Mods.TechTree
-{
-    
-}
