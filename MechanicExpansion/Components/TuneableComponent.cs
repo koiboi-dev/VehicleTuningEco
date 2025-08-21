@@ -29,7 +29,6 @@ namespace Eco.Mods.MechanicExpansion
     [RequireComponent(typeof(VehicleComponent))]
     public class TuneableComponent : WorldObjectComponent, IPersistentData
     {
-        
         public object PersistentData
         {
             get => tuneData;
@@ -58,6 +57,7 @@ namespace Eco.Mods.MechanicExpansion
         private float InitalHumanPoweredValue = 0.5f;
         public void Initialize(int mountCount, int storageSlots, int weightCapacity, float initalHumanPowered, params object[] args)
         {
+            Log.WriteLine(Localizer.DoStr(GetType().AssemblyQualifiedName));
             if (tuneData.MaxSpeedValue == 0)
             {
                 tuneData = TuneManager.GetDefaultData(((IRepresentsItem) Parent).RepresentedItemType);
@@ -132,31 +132,13 @@ namespace Eco.Mods.MechanicExpansion
         public string GetDataString()
         {
             VehicleTuneData data = TuneManager.GetTuneRelation(((IRepresentsItem) Parent).RepresentedItemType);
-            return $"""
-                    Tune Values:
-                    <color={data.MaxSpeedWeights.GetColorFromEvaluated(tuneData.MaxSpeedValue)}>Max Speed: {tuneData.MaxSpeedValue:0.0}</color> kmph
-                    <color={data.FuelConsumptionWeights.GetColorFromEvaluated(tuneData.FuelConsumptionValue)}>Fuel Consumption: {tuneData.FuelConsumptionValue:0}</color> joules/s
-                    <color={data.CO2EmissionWeights.GetColorFromEvaluated(tuneData.CO2EmissionValue)}>Emissions: {tuneData.CO2EmissionValue:0.00}</color> ppm/hour
-                    <color={data.StorageCapacityWeights.GetColorFromEvaluated(tuneData.StorageCapacityValue)}>Storage Capacity: {tuneData.StorageCapacityValue / 1000:0}</color> kg
-                    <color={data.DecayMultiplierWeights.GetColorFromEvaluated(tuneData.DecayMultiplier)}>Decay Multiplier: {tuneData.DecayMultiplier * 100:0.0}</color>
-                    <color={data.OffroadMultiplierWeights.GetColorFromEvaluated(tuneData.OffroadMultiplier)}>Road Speed Multiplier: {tuneData.OffroadMultiplier*100:0.0}</color> %
-                    
-                    Road Speed Multiplier determines how much the vehicle will be affected by the road type, lower values means that good road types will provide less of a multiplier.
-                    """;
+            return $"Tune Values:<br><color={data.MaxSpeedWeights.GetColorFromEvaluated(tuneData.MaxSpeedValue)}>Max Speed: {tuneData.MaxSpeedValue:0.0}</color> kmph <br><color={data.FuelConsumptionWeights.GetColorFromEvaluated(tuneData.FuelConsumptionValue)}>Fuel Consumption: {tuneData.FuelConsumptionValue:0}</color> joules/s <br><color={data.CO2EmissionWeights.GetColorFromEvaluated(tuneData.CO2EmissionValue)}>Emissions: {tuneData.CO2EmissionValue:0.00}</color> ppm/hour <br><color={data.StorageCapacityWeights.GetColorFromEvaluated(tuneData.StorageCapacityValue)}>Storage Capacity: {tuneData.StorageCapacityValue / 1000:0}</color> kg <br><color={data.DecayMultiplierWeights.GetColorFromEvaluated(tuneData.DecayMultiplier)}>Decay Multiplier: {tuneData.DecayMultiplier * 100:0.0}</color><br><color={data.OffroadMultiplierWeights.GetColorFromEvaluated(tuneData.OffroadMultiplier)}>Road Speed Multiplier: {tuneData.OffroadMultiplier * 100:0.0}</color> %<br>Road Speed Multiplier determines how much the vehicle will be affected by the road type, lower values means that good road types will provide less of a multiplier.";
         }
 
         public string GetShortString()
         {
             VehicleTuneData data = TuneManager.GetTuneRelation(((IRepresentsItem) Parent).RepresentedItemType);
-            return $"""
-                    Tune Values:
-                    <color={data.MaxSpeedWeights.GetColorFromEvaluated(tuneData.MaxSpeedValue)}>Max Speed: {tuneData.MaxSpeedValue:0.0}</color> kmph
-                    <color={data.FuelConsumptionWeights.GetColorFromEvaluated(tuneData.FuelConsumptionValue)}>Fuel Consumption: {tuneData.FuelConsumptionValue:0}</color> joules/s
-                    <color={data.CO2EmissionWeights.GetColorFromEvaluated(tuneData.CO2EmissionValue)}>Emissions: {tuneData.CO2EmissionValue:0.00}</color> ppm/hour
-                    <color={data.StorageCapacityWeights.GetColorFromEvaluated(tuneData.StorageCapacityValue)}>Storage Capacity: {tuneData.StorageCapacityValue / 1000:0}</color> kg
-                    <color={data.DecayMultiplierWeights.GetColorFromEvaluated(tuneData.DecayMultiplier)}>Decay Multiplier: {tuneData.DecayMultiplier * 100:0.0}</color>
-                    <color={data.OffroadMultiplierWeights.GetColorFromEvaluated(tuneData.OffroadMultiplier)}>Road Speed Multiplier: {tuneData.OffroadMultiplier*100:0.0}</color> %
-                    """;
+            return $"Tune Values:<br><color={data.MaxSpeedWeights.GetColorFromEvaluated(tuneData.MaxSpeedValue)}>Max Speed: {tuneData.MaxSpeedValue:0.0}</color> kmph <br><color={data.FuelConsumptionWeights.GetColorFromEvaluated(tuneData.FuelConsumptionValue)}>Fuel Consumption: {tuneData.FuelConsumptionValue:0}</color> joules/s <br><color={data.CO2EmissionWeights.GetColorFromEvaluated(tuneData.CO2EmissionValue)}>Emissions: {tuneData.CO2EmissionValue:0.00}</color> ppm/hour <br><color={data.StorageCapacityWeights.GetColorFromEvaluated(tuneData.StorageCapacityValue)}>Storage Capacity: {tuneData.StorageCapacityValue / 1000:0}</color> kg <br><color={data.DecayMultiplierWeights.GetColorFromEvaluated(tuneData.DecayMultiplier)}>Decay Multiplier: {tuneData.DecayMultiplier * 100:0.0}</color><br><color={data.OffroadMultiplierWeights.GetColorFromEvaluated(tuneData.OffroadMultiplier)}>Road Speed Multiplier: {tuneData.OffroadMultiplier * 100:0.0}</color> %";
         }
     }
 

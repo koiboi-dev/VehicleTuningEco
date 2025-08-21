@@ -25,60 +25,6 @@ using Eco.Shared.Utils;
 
 namespace Eco.Mods.MechanicExpansion
 {
-    /*public class TuneBarsContainer : IController, INotifyPropertyChanged
-    {
-        public ControllerList<TuneBar> TuneBars { get; set; }
-
-        public TuneBarsContainer()
-        {
-            TuneBars = new ControllerList<TuneBar>(this, nameof(TuneBars));
-        }
-        
-        
-        #region IController
-        public event PropertyChangedEventHandler PropertyChanged;
-        int controllerID;
-        public ref int ControllerID => ref this.controllerID;
-        #endregion
-    }*/
-    
-    /*[Serialized]
-    public class TuneBar: IController, INotifyPropertyChanged
-    {
-        [Autogen]
-        [SyncToView]
-        [UITypeName("StringTitle")]
-        [PropReadOnly]
-        public string NameTitle
-        {
-            get => name;
-        }
-        
-        [Eco] [Serialized, SyncToView(""), Range(-10, 10)]
-        public int Tune { 
-            get => tune;
-            set
-            {
-                tune = Math.Clamp(value, -10, 10);
-                this.Changed(nameof(Tune));
-            }
-        }
-        private int tune;
-        
-        private string name = "Tune";
-
-        public TuneBar(string name)
-        {
-            this.name = name;
-        }
-        
-        #region IController
-        public event PropertyChangedEventHandler PropertyChanged;
-        int controllerID;
-        public ref int ControllerID => ref this.controllerID;
-        #endregion
-    }*/
-    
     [Serialized]
     [Priority(-2)]
     [CreateComponentTabLoc("Tune Bench", true)]
@@ -88,6 +34,7 @@ namespace Eco.Mods.MechanicExpansion
     public class TuningComponent : WorldObjectComponent, IHasClientControlledContainers
     {
         public User? vehicleAddedUser;
+        public static Type TuneableType;
         
         [SyncToView(null, true)]
         [DependsOnMember("Inventory")]
@@ -206,8 +153,12 @@ namespace Eco.Mods.MechanicExpansion
         
         
         private bool HasTuneChanged = false;
-        
 
+        static TuningComponent()
+        {
+            TuneableType = Type.GetType("s");
+        }
+        
         public TuningComponent()
         {
             Inventory = new AuthorizationInventory(1);
@@ -300,7 +251,8 @@ namespace Eco.Mods.MechanicExpansion
                     {
                         if (player.User.Stomach.BurnCalories(GetCalorieCost(), false))
                         {
-                            itemData.SetPersistentData<TuneableComponent>(evalData);
+                            itemData.Entries.Add(TuneableType, evalData);
+                            //itemData.SetPersistentData<TuneableComponent>(evalData);
                             player.InfoBox(Localizer.Do($"Successfully Tuned vehicle!"));
                         } else {
                             player.InfoBox(Localizer.Do($"<color=red>Insufficient Calories?</color>"));  

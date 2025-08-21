@@ -7,8 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Eco.ReferenceAssemblies" Version="0.11.1.13-beta-release-887" />
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="Eco.ReferenceAssemblies" Version="0.11.1.13-beta-release-887" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <Compile Remove="Components/TuneableVehicles.cs" />
+        <None Include="Components/TuneableVehicles.cs" />
+        <Compile Remove="Components/TuneableComponent.cs" />
+        <None Include="Components/TuneableComponent.cs" />
     </ItemGroup>
 
 </Project>
