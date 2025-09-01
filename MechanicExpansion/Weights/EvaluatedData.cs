@@ -1,4 +1,8 @@
-﻿using Eco.Shared.Serialization;
+﻿using Eco.Core.Controller;
+using Eco.Gameplay.Systems.NewTooltip;
+using Eco.Shared.Items;
+using Eco.Shared.Localization;
+using Eco.Shared.Serialization;
 
 namespace Eco.Mods.MechanicExpansion
 {
@@ -28,5 +32,18 @@ namespace Eco.Mods.MechanicExpansion
         public float DecayMultiplier { get; set; }
         [Serialized]
         public float OffroadMultiplier { get; set; }
+        
+        public string GetShortString(VehicleTuneData data)
+        {
+            return $"""
+                    Tune Values:
+                    <color={data.MaxSpeedWeights.GetColorFromEvaluated(MaxSpeedValue)}>Max Speed: {MaxSpeedValue:0.0}</color> kmph
+                    <color={data.FuelConsumptionWeights.GetColorFromEvaluated(FuelConsumptionValue)}>Fuel Consumption: {FuelConsumptionValue:0}</color> joules/s
+                    <color={data.CO2EmissionWeights.GetColorFromEvaluated(CO2EmissionValue)}>Emissions: {CO2EmissionValue:0.00}</color> ppm/hour
+                    <color={data.StorageCapacityWeights.GetColorFromEvaluated(StorageCapacityValue)}>Storage Capacity: {StorageCapacityValue / 1000:0}</color> kg
+                    <color={data.DecayMultiplierWeights.GetColorFromEvaluated(DecayMultiplier)}>Decay Multiplier: {DecayMultiplier * 100:0.0}</color>
+                    <color={data.OffroadMultiplierWeights.GetColorFromEvaluated(OffroadMultiplier)}>Road Speed Multiplier: {OffroadMultiplier*100:0.0}</color> %
+                    """;
+        }
     }
 }
