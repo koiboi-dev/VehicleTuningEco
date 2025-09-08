@@ -274,7 +274,6 @@ namespace Eco.Mods.MechanicExpansion
         [LocDescription("Tune the vehicle.")]
         public void ApplyTune(Player player)
         {
-            Log.WriteLine(Localizer.Do($"HOLY TUNE"));
             if (vehicleAddedUser == null)
             {
                 player.InfoBox(Localizer.Do($"<color=red>Unknown player, try to replace the vehicle in the tuning slot.</color>"));  

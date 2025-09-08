@@ -55,12 +55,17 @@ namespace Eco.Mods.MechanicExpansion
         [NewTooltipChildren(CacheAs.Instance, flags: TTFlags.AllowNonControllerTypeForChildren)]
         public string ShortString => GetShortString();
 
-        private float InitalHumanPoweredValue = 0.5f;
+        private float _initalHumanPoweredValue = 0.5f;
         public void Initialize(int mountCount, int storageSlots, int weightCapacity, float initalHumanPowered, params object[] args)
         {
             if (tuneData.MaxSpeedValue == 0)
             {
-                tuneData = TuneManager.GetDefaultData(((IRepresentsItem) Parent).RepresentedItemType);
+                EvaluatedData? data = TuneManager.GetDefaultData(((IRepresentsItem)Parent).RepresentedItemType);
+                if (data == null)
+                {
+                    return;
+                } 
+                tuneData = (EvaluatedData) data;
                 this.Changed(nameof(tuneData));
             }
             Parent.GetComponent<VehicleComponent>().Initialize(tuneData.MaxSpeedValue, tuneData.OffroadMultiplier, mountCount);
@@ -93,7 +98,7 @@ namespace Eco.Mods.MechanicExpansion
                 Parent.GetComponent<PartsComponent>().DecayMultiplier = tuneData.DecayMultiplier;
             }
 
-            InitalHumanPoweredValue = initalHumanPowered;
+            _initalHumanPoweredValue = initalHumanPowered;
             stopwatch.Start();
             base.Initialize();
         }
@@ -108,11 +113,11 @@ namespace Eco.Mods.MechanicExpansion
             Player driver = Parent.GetComponent<VehicleComponent>().Driver;
             if (prevDriver == null && driver != null)
             {
-                Parent.GetComponent<VehicleComponent>().HumanPowered(EfficiencyValue.GetCurrentValue(driver.User) * InitalHumanPoweredValue);
+                Parent.GetComponent<VehicleComponent>().HumanPowered(EfficiencyValue.GetCurrentValue(driver.User) * _initalHumanPoweredValue);
                 prevDriver = driver;
             } else if (driver == null && prevDriver != null)
             {
-                Parent.GetComponent<VehicleComponent>().HumanPowered(InitalHumanPoweredValue);
+                Parent.GetComponent<VehicleComponent>().HumanPowered(_initalHumanPoweredValue);
                 prevDriver = null;
             }
             base.Tick();

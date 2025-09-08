@@ -32,6 +32,7 @@ namespace Eco.Mods.MechanicExpansion
         };
         
         private static Dictionary<Type, VehicleTuneData> Relations = new Dictionary<Type, VehicleTuneData>();
+        private static Dictionary<Type, VehicleTuneData> DefaultRelations = new Dictionary<Type, VehicleTuneData>();
 
         private static void LoadVehicleRelations()
         {
@@ -143,6 +144,15 @@ namespace Eco.Mods.MechanicExpansion
                 offroadWeights
                 )
             );
+            DefaultRelations.Add(itemObjectType, new VehicleTuneData(
+                    maxSpeedWeights,
+                    fuelConsumptionWeights,
+                    co2EmissionWeights,
+                    storageCapacityWeights,
+                    durabilityWeights,
+                    offroadWeights
+                )
+            );
             /*MethodInfo info = worldObjectType.GetMethod("ExposedModsPreInitialize",
                 BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public);
             Log.WriteLine(Localizer.Do($"Type: {worldObjectType}, Method: {info} + {info.GetType()}"));
@@ -186,11 +196,20 @@ namespace Eco.Mods.MechanicExpansion
             return Relations[vType];
         }
 
-        public static EvaluatedData GetDefaultData(Type vType)
+        public static EvaluatedData? GetDefaultData(Type vType)
         {
             if (!Relations.ContainsKey(vType))
             {
-                Log.WriteError(Localizer.DoStr("No type"));
+                Log.WriteError(Localizer.DoStr($"No type found for {vType}, resorting to defaults!"));
+                if (DefaultRelations.ContainsKey(vType))
+                {
+                    return Relations[vType].Evaluate(new []{0, 0, 0, 0, 0, 0});
+                }
+                else
+                {
+                    Log.WriteError(Localizer.DoStr($"No defaults found for {vType}, forcing tuneable off!"));
+                    return null;
+                }
             }
             return Relations[vType].Evaluate(new []{0, 0, 0, 0, 0, 0});
         }
