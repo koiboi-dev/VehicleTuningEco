@@ -42,8 +42,8 @@ namespace Eco.Mods.MechanicExpansion
             }
         }
 
-        [Serialized] 
-        public EvaluatedData tuneData;
+        [Serialized]//, NewTooltipChildren(CacheAs.Instance, flags: TTFlags.AllowNonControllerTypeForChildren)]
+        public EvaluatedData tuneData { get; private set; }
 
         [Autogen]
         [SyncToView]
@@ -52,7 +52,7 @@ namespace Eco.Mods.MechanicExpansion
         public string DataString => GetDataString();
         
         [SyncToView(null, false)]
-        [NewTooltipChildren(CacheAs.Instance, flags: TTFlags.AllowNonControllerTypeForChildren)]
+        //[NewTooltipChildren(CacheAs.Instance, flags: TTFlags.AllowNonControllerTypeForChildren)]
         public string ShortString => GetShortString();
 
         private float _initalHumanPoweredValue = 0.5f;
@@ -153,15 +153,7 @@ namespace Eco.Mods.MechanicExpansion
         public string GetShortString()
         {
             VehicleTuneData data = TuneManager.GetTuneRelation(((IRepresentsItem) Parent).RepresentedItemType);
-            return $"""
-                    Tune Values:
-                    <color={data.MaxSpeedWeights.GetColorFromEvaluated(tuneData.MaxSpeedValue)}>Max Speed: {tuneData.MaxSpeedValue:0.0}</color> kmph
-                    <color={data.FuelConsumptionWeights.GetColorFromEvaluated(tuneData.FuelConsumptionValue)}>Fuel Consumption: {tuneData.FuelConsumptionValue:0}</color> joules/s
-                    <color={data.CO2EmissionWeights.GetColorFromEvaluated(tuneData.CO2EmissionValue)}>Emissions: {tuneData.CO2EmissionValue:0.00}</color> ppm/hour
-                    <color={data.StorageCapacityWeights.GetColorFromEvaluated(tuneData.StorageCapacityValue)}>Storage Capacity: {tuneData.StorageCapacityValue / 1000:0}</color> kg
-                    <color={data.DecayMultiplierWeights.GetColorFromEvaluated(tuneData.DecayMultiplier)}>Decay Multiplier: {tuneData.DecayMultiplier * 100:0.0}</color>
-                    <color={data.OffroadMultiplierWeights.GetColorFromEvaluated(tuneData.OffroadMultiplier)}>Road Speed Multiplier: {tuneData.OffroadMultiplier*100:0.0}</color> %
-                    """;
+            return tuneData.GetShortString(data);
         }
     }
 

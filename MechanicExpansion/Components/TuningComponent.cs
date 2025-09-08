@@ -260,7 +260,7 @@ namespace Eco.Mods.MechanicExpansion
             {
                 if (data.PersistentData is ItemPersistentData itemData)
                 {
-                    return itemData.Entries.Keys.Contains(Type.GetType("Eco.Mods.MechanicExpansion.TuneableComponent"));
+                    return itemData.Entries.Keys.Contains(typeof(TuneableComponent));
                 }
             }
 
